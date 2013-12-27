@@ -34,7 +34,7 @@ From there, you can:
 
 * Convert your `Herringbone` into a wai `Application` or `Middleware`, with
   `toApplication` and `toMiddleware` respectively
-* Access assets programmatically with `findAsset :: Herringbone -> IO
-  BundledAsset`
+* Access assets programmatically with `findAsset :: Herringbone -> AssetPath ->
+  IO BundledAsset`
 
 [Sprockets]: https://github.com/sstephenson/sprockets
