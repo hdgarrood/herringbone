@@ -41,7 +41,7 @@ From there, you can:
 
 Here's how preprocessors look:
 
-```
+```haskell
 type Preprocessor :: FilePath --^ the source file path
                   -> FilePath --^ the destination file path
                   -> IO CompileResult
