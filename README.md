@@ -44,10 +44,13 @@ Here's how preprocessors look:
 ```haskell
 type Preprocessor :: FilePath --^ the source file path
                   -> FilePath --^ the destination file path
-                  -> IO CompileResult
+                  -> IO (Maybe CompileError)
 ```
 
-where `data CompileResult = Success | Failure Text`.
+where
+```haskell
+newtype CompileError = CompileError { getCompileError :: Text }
+```
 
 To make a custom preprocessor, you provide this function, and add it to the
 preprocessor list. Herringbone takes care of the rest.
