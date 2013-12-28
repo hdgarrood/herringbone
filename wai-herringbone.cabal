@@ -19,6 +19,7 @@ library
   exposed-modules:      Network.Wai.Herringbone
   other-modules:        Network.Wai.Herringbone.FileSystemUtils
                         Network.Wai.Herringbone.Types
+                        Network.Wai.Herringbone.Configuration
   build-depends:        base >=4.6 && <4.7,
                         wai  >= 2.0 && <3,
                         wai-app-static,

@@ -47,7 +47,10 @@ lookupPP :: Text -> PPs -> Maybe PP
 lookupPP ext = M.lookup ext . unPPs
 
 fromList :: [PP] -> PPs
-fromList = foldr insertPP noPPs
+fromList ppList = insertAllPPs ppList noPPs
+
+insertAllPPs :: [PP] -> PPs -> PPs
+insertAllPPs ppList pps = foldr insertPP pps ppList
 
 data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
