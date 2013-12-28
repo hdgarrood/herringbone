@@ -1,7 +1,7 @@
 name:                wai-herringbone
 version:             0.0.1
-synopsis:            Manages all the static and preprocessed static files for your web application.
-description:         Manages all the static and preprocessed static files for your web application. For more information, please see <https://github.com/hdgarrood/wai-herringbone>.
+synopsis:            A library for compiling and serving static web assets.
+description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/wai-herringbone>.
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
