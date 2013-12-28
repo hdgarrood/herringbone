@@ -1,20 +1,16 @@
 module Network.Wai.Herringbone where
 
-import Control.Applicative
 import Control.Monad
 import qualified Data.Map as M
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString as B
 import Data.Time
 import Data.Time.Clock.POSIX
 import System.Posix.Types (EpochTime)
 import Data.Char
 import Data.Monoid
 import Data.List
-import Data.List.Split
 import Data.Maybe
 import Data.Text (Text)
-import qualified Data.Text as T
 import Network.Wai
 import Network.Wai.Application.Static
 import WaiAppStatic.Types
@@ -23,7 +19,6 @@ import Prelude hiding (FilePath)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
-import System.PosixCompat.Files
 
 import Network.Wai.Herringbone.FileSystemUtils
 
@@ -40,7 +35,7 @@ type CompileError = String
 
 -- | PP
 data PP = PP
-    { ppExtension :: String
+    { ppExtension :: Text
     -- ^ The file extension this preprocessor acts upon, eg "sass" or "coffee"
     , ppAction    :: FilePath -> FilePath -> IO (Maybe CompileError)
     -- ^ an function which takes a source path and a destination path and
@@ -48,21 +43,21 @@ data PP = PP
     }
 
 -- | Yes, there's a bit of redundancy here...
-newtype PPs = PPs { unPPs :: M.Map String PP }
+newtype PPs = PPs { unPPs :: M.Map Text PP }
 
 noPPs :: PPs
 noPPs = PPs M.empty
 
-supportedBy :: PPs -> String -> Bool
+supportedBy :: PPs -> Text -> Bool
 supportedBy pps = flip M.member (unPPs pps)
 
-supportedExts :: PPs -> [String]
+supportedExts :: PPs -> [Text]
 supportedExts = M.keys . unPPs
 
 insertPP :: PP -> PPs -> PPs
 insertPP pp = PPs . M.insert (ppExtension pp) pp . unPPs
 
-lookupPP :: String -> PPs -> Maybe PP
+lookupPP :: Text -> PPs -> Maybe PP
 lookupPP ext = M.lookup ext . unPPs
 
 fromList :: [PP] -> PPs
@@ -89,10 +84,10 @@ findAsset hb path = do
 buildAsset :: Herringbone -> Pieces -> (FilePath, [PP]) -> IO File
 buildAsset hb pieces (sourcePath, pps) = do
     let destPath = hbDestDir hb </> toFilePath pieces
-    let fileName = last pieces
+    let name = last pieces
     result <- runPPs pps sourcePath destPath
     either (return . assetCompileError)
-           (const (toFile sourcePath destPath fileName))
+           (const (toFile sourcePath destPath name))
            result
 
 
@@ -102,7 +97,8 @@ chain (f:fs) m = f m >>= either (return . Left) (chain fs)
 
 runPPs :: [PP] -> FilePath -> FilePath -> IO (Either CompileError ())
 runPPs pps source dest = do
-    tmpSource <- openTempFile'
+    tmpSource <- makeTempFile
+    F.copyFile source tmpSource
     result <- chain (map runPPinTmpDir pps) tmpSource
     either (return . Left) (fmap Right . moveTo dest) result
     where
@@ -117,7 +113,7 @@ runPPs pps source dest = do
 -- If the compilation fails, then the source file is not deleted.
 runPPinTmpDir :: PP -> FilePath -> IO (Either CompileError FilePath)
 runPPinTmpDir pp source = do
-    dest <- openTempFile'
+    dest <- makeTempFile
     result <- ppAction pp source dest
     maybe (F.removeFile source >> return (Right dest))
           (return . Left)
@@ -147,7 +143,8 @@ toEpochTime = fromIntegral . toSecs
     toSecs = floor . utcTimeToPOSIXSeconds
 
 assetCompileError :: CompileError -> File
-assetCompileError err = fileError (toLazyByteString err) "compile-error.html"
+assetCompileError err =
+    fileError (toLazyByteString err) (unsafeToPiece "compile-error.html")
 
 ambiguousSource :: [FilePath] -> File
 ambiguousSource sources =
@@ -156,7 +153,7 @@ ambiguousSource sources =
                 "<ul>" <>
                 BL.concat (map (\s -> "<li>" <> toLazyByteString s <> "</li>") sources) <>
                 "</ul>"
-    in fileError body "error-ambiguous-source.html" 
+    in fileError body (unsafeToPiece "error-ambiguous-source.html")
 
 fileError :: BL.ByteString -> Piece -> File
 fileError body name =
@@ -180,13 +177,13 @@ getAssetsFrom :: PPs         -- ^ List of preprocessors
               -> FilePath    -- ^ Directory to look in
               -> IO [(FilePath, [PP])]
 getAssetsFrom _   []     _   = return []
-getAssetsFrom pps (x:xs) dir = getAssetsFrom pps xs (dir </> toFilePath x)
 getAssetsFrom pps [x] dir    = do
     exists <- F.isDirectory dir
     if exists
         then do contents <- F.listDirectory dir
-                return $ getAssetsFrom' pps (T.unpack x) contents
+                return $ getAssetsFrom' pps (toFilePath x) contents
         else return []
+getAssetsFrom pps (x:xs) dir = getAssetsFrom pps xs (dir </> toFilePath x)
 
 -- Given a list of preprocessors, the path of an asset we want to serve, and
 -- a list of potential source files, return a list of all the files which could
@@ -214,18 +211,17 @@ getAssetsFrom' :: PPs
                -> [(FilePath, [PP])]
 getAssetsFrom' pps assetPath = catMaybes . map resolve
     where
-    resolve :: FilePath -> Maybe (FilePath, PPs)
-    resolve fp =
-        fmap (\xs -> (fp, xs)) $ (resolvePPs pps assetPath fp)
+    resolve :: FilePath -> Maybe (FilePath, [PP])
+    resolve fp = fmap (\xs -> (fp, xs)) $ (resolvePPs pps assetPath fp)
 
 -- Can we apply a sequence of the given preprocessors to the given source file
 -- path to get the given asset? If so, return the list of preprocessors which
 -- should be applied to it to make this happen.
 resolvePPs :: PPs -> FilePath -> FilePath -> Maybe [PP]
 resolvePPs pps assetPath source = do
-    exts <- getExtraExtensions source assetPath
-    pps  <- sequence $ map (lookupPP pps) exts
-    return pps
+    exts   <- getExtraExtensions source assetPath
+    ppList <- sequence $ map (\e -> lookupPP e pps) exts
+    return ppList
 
 -- Check if a file path is formed from another file path plus a list of
 -- extensions, and if so, return those extensions, in reverse order.
@@ -233,8 +229,7 @@ resolvePPs pps assetPath source = do
 --  getExtraExtensions "game.js.coffee" "game.js"     == Just ["coffee"]
 --  getExtraExtensions "game.js.coffee" "style.css"   == Nothing
 --  getExtraExtensions "game.js.coffee.erb" "game.js" == Just ["erb", "coffee"]
-getExtraExtensions :: FilePath -> FilePath -> Maybe [String]
+getExtraExtensions :: FilePath -> FilePath -> Maybe [Text]
 getExtraExtensions fpWithExts fp = do
-    guard (fp `isPrefixOf` fpWithExts)
-    let xs = map reverse . endBy "." . reverse . drop (length fp) $ fpWithExts
-    return xs
+    stripped <- F.stripPrefix fp fpWithExts
+    return $ (reverse . F.extensions) stripped
