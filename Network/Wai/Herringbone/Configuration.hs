@@ -21,3 +21,6 @@ setDestDir dir hb = hb { hbDestDir = dir }
 
 addPreprocessors :: [PP] -> ConfigBuilder
 addPreprocessors ppList hb = hb { hbPPs = insertAllPPs ppList (hbPPs hb) }
+
+herringbone :: ConfigBuilder -> Herringbone
+herringbone builder = builder defaultHerringbone

@@ -51,9 +51,10 @@ runPPs pps source dest = do
     tmpSource <- makeTempFile
     F.copyFile source tmpSource
     result <- chain (map runPPinTmpDir pps) tmpSource
-    either (return . Left) (fmap Right . moveTo dest) result
-    where
-    moveTo = flip F.rename
+    either (return . Left)
+           (\destTmp -> do F.rename destTmp dest
+                           return (Right ()))
+           result
     
 -- Given a preprocessor and a file path:
 --  * run the preprocessor on the filepath,

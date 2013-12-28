@@ -2,6 +2,7 @@ module Network.Wai.Herringbone.Types where
 
 import Data.Char
 import Data.Text (Text)
+import qualified Data.Text as T
 import qualified Data.Map as M
 import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F
@@ -27,6 +28,10 @@ data PP = PP
     -- ^ an function which takes a source path and a destination path and
     -- returns an action which performs the compilation
     }
+
+instance Show PP where
+    show pp = "PP { ppExtension = " ++ T.unpack (ppExtension pp) ++
+                 ", ppAction = <not showable> }"
 
 -- | Yes, there's a bit of redundancy here...
 newtype PPs = PPs { unPPs :: M.Map Text PP }
