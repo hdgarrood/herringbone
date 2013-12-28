@@ -1,6 +1,7 @@
 module Network.Wai.Herringbone.Types where
 
 import Data.Char
+import Data.Time.Clock
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Map as M
@@ -17,6 +18,10 @@ instance ToLazyByteString String where
 
 instance ToLazyByteString FilePath where
     toLazyByteString = BL.fromChunks . (: []) . F.encode
+
+data AssetError = AssetNotFound
+                | AssetCompileError CompileError
+                | AmbiguousSources [FilePath]
 
 type CompileError = String
 
@@ -61,4 +66,19 @@ data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
     , hbDestDir    :: FilePath
     , hbPPs        :: PPs
+    }
+
+newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
+
+data BundledAsset = BundledAsset
+    { assetSize         :: Integer
+    -- ^ Size of the asset in bytes
+    , assetSourcePath   :: FilePath
+    -- ^ Path to the asset's source file on disk
+    , assetFilePath     :: FilePath
+    -- ^ Path to the preprocessed asset on disk
+    , assetLogicalPath  :: LogicalPath
+    -- ^ Logical path supplied to Herringbone
+    , assetModifiedTime :: UTCTime
+    -- ^ Modification time of the asset's source file
     }

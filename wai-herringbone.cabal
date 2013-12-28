@@ -20,6 +20,9 @@ library
   other-modules:        Network.Wai.Herringbone.FileSystemUtils
                         Network.Wai.Herringbone.Types
                         Network.Wai.Herringbone.Configuration
+                        Network.Wai.Herringbone.LocateAssets
+                        Network.Wai.Herringbone.BuildAsset
+                        Network.Wai.Herringbone.FindAsset
   build-depends:        base >=4.6 && <4.7,
                         wai  >= 2.0 && <3,
                         wai-app-static,
