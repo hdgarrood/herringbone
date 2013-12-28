@@ -1,7 +1,7 @@
+-- | This module contains functions to build assets (that is, run preprocessing
+-- if necessary, and copy to destination directory).
 module Network.Wai.Herringbone.BuildAsset where
 
--- | This module contains the code for building assets.
---
 import Data.Maybe
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F

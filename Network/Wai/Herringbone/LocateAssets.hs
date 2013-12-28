@@ -1,7 +1,6 @@
-module Network.Wai.Herringbone.LocateAssets where
-
 -- | This module deals with locating assets on the disk, and calculating how to
 -- create assets which need preprocessing.
+module Network.Wai.Herringbone.LocateAssets where
 
 import Data.Maybe
 import Data.Text (Text)
