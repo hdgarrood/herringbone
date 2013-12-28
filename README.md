@@ -42,14 +42,11 @@ From there, you can:
 Here's how preprocessors look:
 
 ```haskell
-type Preprocessor :: FilePath --^ the source file path
-                  -> FilePath --^ the destination file path
-                  -> IO (Maybe CompileError)
-```
-
-where
-```haskell
 newtype CompileError = CompileError { getCompileError :: Text }
+
+type Preprocessor :: FilePath -- ^ the source file path
+                  -> FilePath -- ^ the destination file path
+                  -> IO (Maybe CompileError)
 ```
 
 To make a custom preprocessor, you provide this function, and add it to the
