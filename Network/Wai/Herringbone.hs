@@ -5,7 +5,9 @@ import Control.Monad
 import qualified Data.Map as M
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString as B
-import Data.Time.Clock
+import Data.Time
+import Data.Time.Clock.POSIX
+import System.Posix.Types (EpochTime)
 import Data.Char
 import Data.Monoid
 import Data.List
@@ -17,12 +19,22 @@ import Network.Wai
 import Network.Wai.Application.Static
 import WaiAppStatic.Types
 import Network.HTTP.Types
-import System.Directory
-import System.FilePath
-import System.IO.Temp
+import Prelude hiding (FilePath)
+import Filesystem.Path.CurrentOS (FilePath, (</>))
+import qualified Filesystem.Path.CurrentOS as F
+import qualified Filesystem as F
 import System.PosixCompat.Files
 
-toLazyByteString = BL.pack . map (fromIntegral . ord)
+import Network.Wai.Herringbone.FileSystemUtils
+
+class ToLazyByteString a where
+    toLazyByteString :: a -> BL.ByteString
+
+instance ToLazyByteString String where
+    toLazyByteString = BL.pack . map (fromIntegral . ord)
+
+instance ToLazyByteString FilePath where
+    toLazyByteString = BL.fromChunks . (: []) . F.encode
 
 type CompileError = String
 
@@ -62,13 +74,11 @@ data Herringbone = Herringbone
     , hbPPs        :: PPs
     }
 
-type LogicalPath = Pieces
-
 toApplication :: Herringbone -> Application
 toApplication hb@(Herringbone { hbDestDir = dest }) =
-    defaultWebAppSettings dest { ssLookupFile = findAsset hb }
+    staticApp $ (defaultWebAppSettings dest) { ssLookupFile = findAsset hb }
 
-findAsset :: Herringbone -> LogicalPath -> IO LookupResult
+findAsset :: Herringbone -> Pieces -> IO LookupResult
 findAsset hb path = do
     assets <- getAssets hb path
     case assets of
@@ -76,26 +86,19 @@ findAsset hb path = do
         [x] -> fmap LRFile $ buildAsset hb path x
         xs  -> return . LRFile $ ambiguousSource (map fst xs)
 
-toFilePath :: LogicalPath -> FilePath
-toFilePath = T.unpack . T.concat . T.intercalate "/"
-
-buildAsset :: Herringbone -> (FilePath, [PP]) -> LogicalPath -> IO File
-buildAsset hb (sourcePath, pps) logicalPath = do
-    let destPath = hbDestDir hb </> toFilePath logicalPath
-    let fileName = last logicalPath
+buildAsset :: Herringbone -> Pieces -> (FilePath, [PP]) -> IO File
+buildAsset hb pieces (sourcePath, pps) = do
+    let destPath = hbDestDir hb </> toFilePath pieces
+    let fileName = last pieces
     result <- runPPs pps sourcePath destPath
-    either assetCompileError
+    either (return . assetCompileError)
            (const (toFile sourcePath destPath fileName))
            result
 
-openTempFile' :: IO FilePath
-openTempFile' fp =
-    let template = "herringbone-intermediate."
-    in  fmap fst $ openTempFile template <*> getTemporaryDirectory
 
 chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
 chain []     m = return (Right m)
-chain (f:fs) m = f m >>= either return (chain fs)
+chain (f:fs) m = f m >>= either (return . Left) (chain fs)
 
 runPPs :: [PP] -> FilePath -> FilePath -> IO (Either CompileError ())
 runPPs pps source dest = do
@@ -103,7 +106,7 @@ runPPs pps source dest = do
     result <- chain (map runPPinTmpDir pps) tmpSource
     either (return . Left) (fmap Right . moveTo dest) result
     where
-    moveTo = flip renameFile
+    moveTo = flip F.rename
     
 -- Given a preprocessor and a file path:
 --  * run the preprocessor on the filepath,
@@ -116,49 +119,56 @@ runPPinTmpDir :: PP -> FilePath -> IO (Either CompileError FilePath)
 runPPinTmpDir pp source = do
     dest <- openTempFile'
     result <- ppAction pp source dest
-    maybe (removeFile source >> return (Right dest))
+    maybe (F.removeFile source >> return (Right dest))
           (return . Left)
           result
 
 -- This is just given to wai-app-static which takes care of serving it.
 toFile :: FilePath -- ^ source path
        -> FilePath -- ^ dest path
-       -> Text     -- ^ file name
+       -> Piece    -- ^ file name
        -> IO File
 toFile source dest name = do
-    sourceSt <- getFileStatus source
-    destSt   <- getFileStatus dest
+    size  <- F.getSize dest
+    mtime <- fmap toEpochTime $ F.getModified source
+    let strDest = F.encodeString dest
     return File
-        { fileGetSize     = fromIntegral (fileSize destSt)
-        , fileToResponse  = \s h -> responseFile s h dest Nothing
+        { fileGetSize     = fromIntegral size
+        , fileToResponse  = \s h -> responseFile s h strDest Nothing
         , fileName        = name
-        , fileGetHash     = Nothing -- TODO
-        , fileGetModified = Just (modificationTime sourceSt)
+        , fileGetHash     = return Nothing -- TODO
+        , fileGetModified = Just mtime
         }
 
+toEpochTime :: UTCTime -> EpochTime
+toEpochTime = fromIntegral . toSecs
+    where
+    toSecs :: UTCTime -> Int
+    toSecs = floor . utcTimeToPOSIXSeconds
+
 assetCompileError :: CompileError -> File
-assetCompileError err = fileError err "compile-error.html"
+assetCompileError err = fileError (toLazyByteString err) "compile-error.html"
 
 ambiguousSource :: [FilePath] -> File
 ambiguousSource sources =
     let body = "<h1>Ambiguous asset source</h1>" <>
                 "<p>List of possible asset sources:</p>" <>
                 "<ul>" <>
-                map (\s -> "<li>" <> toLazyByteString s <> "</li>") sources <>
+                BL.concat (map (\s -> "<li>" <> toLazyByteString s <> "</li>") sources) <>
                 "</ul>"
     in fileError body "error-ambiguous-source.html" 
 
-fileError :: BL.ByteString -> Text -> File
+fileError :: BL.ByteString -> Piece -> File
 fileError body name =
     File
-        { fileGetSize     = BL.length body
+        { fileGetSize     = fromIntegral $ BL.length body
         , fileToResponse  = \_ headers -> responseLBS status500 headers body
         , fileName        = name
         , fileGetHash     = return Nothing
         , fileGetModified = Nothing
         }
 
-getAssets :: Herringbone -> LogicalPath -> IO [(FilePath, [PP])]
+getAssets :: Herringbone -> Pieces -> IO [(FilePath, [PP])]
 getAssets hb path = do
     let sourceDirs = hbSourceDirs hb
     let pps        = hbPPs hb
@@ -166,15 +176,15 @@ getAssets hb path = do
     return $ concat assets
 
 getAssetsFrom :: PPs         -- ^ List of preprocessors
-              -> LogicalPath -- ^ Logical path of asset we're searching for
+              -> Pieces      -- ^ requested path pieces
               -> FilePath    -- ^ Directory to look in
               -> IO [(FilePath, [PP])]
 getAssetsFrom _   []     _   = return []
-getAssetsFrom pps (x:xs) dir = getAssetsFrom pps xs (dir </> T.unpack x)
+getAssetsFrom pps (x:xs) dir = getAssetsFrom pps xs (dir </> toFilePath x)
 getAssetsFrom pps [x] dir    = do
-    exists <- doesDirectoryExist dir
+    exists <- F.isDirectory dir
     if exists
-        then do contents <- getDirectoryContents dir
+        then do contents <- F.listDirectory dir
                 return $ getAssetsFrom' pps (T.unpack x) contents
         else return []
 

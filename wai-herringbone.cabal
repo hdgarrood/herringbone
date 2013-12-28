@@ -17,6 +17,7 @@ source-repository head
 library
   ghc-options:          -Wall
   exposed-modules:      Network.Wai.Herringbone
+  other-modules:        Network.Wai.Herringbone.FileSystemUtils
   build-depends:        base >=4.6 && <4.7,
                         wai  >= 2.0 && <3,
                         wai-app-static,
@@ -24,11 +25,12 @@ library
                         bytestring,
                         containers,
                         split,
-                        filepath,
+                        system-filepath,
+                        system-fileio,
                         directory,
                         temporary,
                         unix-compat,
                         http-types,
                         time
-  default-extensions:   OverloadedStrings
+  default-extensions:   OverloadedStrings, TypeSynonymInstances, FlexibleInstances
   default-language:     Haskell2010
