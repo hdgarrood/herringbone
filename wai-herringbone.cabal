@@ -15,7 +15,20 @@ source-repository head
   location: https://github.com/hdgarrood/wai-herringbone
 
 library
+  ghc-options:          -Wall
   exposed-modules:      Network.Wai.Herringbone
   build-depends:        base >=4.6 && <4.7,
-                        wai  >= 2.0 && <3
+                        wai  >= 2.0 && <3,
+                        wai-app-static,
+                        text,
+                        bytestring,
+                        containers,
+                        split,
+                        filepath,
+                        directory,
+                        temporary,
+                        unix-compat,
+                        http-types,
+                        time
+  default-extensions:   OverloadedStrings
   default-language:     Haskell2010
