@@ -37,4 +37,19 @@ From there, you can:
 * Access assets programmatically with `findAsset :: Herringbone -> AssetPath ->
   IO BundledAsset`
 
+### Defining custom preprocessors
+
+Here's how preprocessors look:
+
+```
+type Preprocessor :: FilePath --^ the source file path
+                  -> FilePath --^ the destination file path
+                  -> IO CompileResult
+```
+
+where `data CompileResult = Success | Failure Text`.
+
+To make a custom preprocessor, you provide this function, and add it to the
+preprocessor list. Herringbone takes care of the rest.
+
 [Sprockets]: https://github.com/sstephenson/sprockets
