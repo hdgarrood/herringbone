@@ -1,12 +1,11 @@
 module BuildAssetSpec where
 
 import Test.Hspec
-import Test.HUnit
+import Test.HUnit hiding (path)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Filesystem.Path.CurrentOS (FilePath, (</>))
-import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import qualified Data.ByteString as B
 import Data.Monoid
@@ -19,7 +18,9 @@ spec :: Spec
 spec = do
     let sourceDir = "test/resources/assets"
     let destDir   = hbDestDir testHB
-    after (clean destDir) $ do
+    let workingDir = hbWorkingDir testHB
+
+    after (clean destDir >> clean workingDir) $ do
         context "without preprocessors" $ do
             let source = sourceDir </> "buildAsset.js"
             let dest   = destDir   </> "buildAsset.js"
@@ -49,7 +50,7 @@ spec = do
                 let dest   = destDir   </> "buildPreprocess.js"
                 let logPath = lp "buildPreprocess.js"
 
-                asset <- buildAsset testHB logPath source [coffee]
+                _ <- buildAsset testHB logPath source [coffee]
 
                 assertRanPreprocessor "coffee" dest
 
