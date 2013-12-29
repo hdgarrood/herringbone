@@ -35,7 +35,8 @@ test-suite herringbone-tests
                         time,
                         old-locale,
                         hspec,
-                        HUnit
+                        HUnit,
+                        warp
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances
