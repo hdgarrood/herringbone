@@ -22,9 +22,7 @@ spec = do
     let workingDir = hbWorkingDir testHB
 
     let cleanEverything = clean destDir >> clean workingDir
-    let withHooks = ( before (do exists <- F.isDirectory workingDir
-                                 when (not exists)
-                                    (F.createDirectory False workingDir)
+    let withHooks = ( before (do F.createDirectory True workingDir
                                  cleanEverything)
                     . after cleanEverything
                     )
