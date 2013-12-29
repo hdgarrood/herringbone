@@ -50,6 +50,7 @@ library
                         Network.Wai.Herringbone.LocateAssets
                         Network.Wai.Herringbone.BuildAsset
                         Network.Wai.Herringbone.FindAsset
+                        Network.Wai.Herringbone.WaiAdapter
   build-depends:        base >=4.6 && <4.7,
                         wai  >= 2.0 && <3,
                         wai-app-static,
