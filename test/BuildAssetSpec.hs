@@ -17,8 +17,8 @@ import SpecHelper
 
 spec :: Spec
 spec = do
-    let sourceDir = "test/resources/assets"
-    let destDir   = hbDestDir testHB
+    let sourceDir  = "test/resources/assets"
+    let destDir    = hbDestDir testHB
     let workingDir = hbWorkingDir testHB
 
     let withHooks = ( before (do exists <- F.isDirectory workingDir
