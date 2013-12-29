@@ -28,41 +28,39 @@ spec = do
                     )
 
     withHooks $ do
-        -- context "without preprocessors" $ do
-        --     let source  = sourceDir </> "buildAsset.js"
-        --     let dest    = destDir   </> "buildAsset.js"
-        --     let logPath = lp "buildAsset.js"
+        context "without preprocessors" $ do
+            let logPath = lp "buildAsset.js"
 
-        --     it "should copy a source file to the destination directory" $ do
-        --         asset <- buildAsset testHB logPath source []
+            it "should copy a source file to the destination directory" $ do
+                asset' <- findAsset testHB logPath
 
-        --         assertIsRight asset
-        --         assertFileExists dest
-        --         assertFileContentsMatch source dest
+                assertIsRight asset'
+                let Right asset = asset'
+                assertFileExists (assetFilePath asset)
+                assertFileContentsMatch (assetSourcePath asset)
+                                        (assetFilePath asset)
 
-        --     it "should not modify the source file" $ do
-        --         _ <- buildAsset testHB logPath source []
+            it "should get the modification time of the source file" $ do
+                Right asset <- findAsset testHB logPath
+                sourceMTime <- F.getModified (assetSourcePath asset)
 
-        --         assertFileExists source
+                assertEqual' sourceMTime (assetModifiedTime asset)
 
-        --     it "should get the modification time of the source file" $ do
-        --         sourceMTime <- F.getModified source
-        --         Right asset <- buildAsset testHB logPath source []
+            it "should not compile unless necessary" $ do
+                Right asset  <- findAsset testHB logPath
+                mTime        <- F.getModified (assetFilePath asset)
+                Right asset' <- findAsset testHB logPath
+                mTime'       <- F.getModified (assetFilePath asset')
 
-        --         assertEqual' sourceMTime (assetModifiedTime asset)
-        --
-        --     it "should not compile unless necessary" $ do
-        --         pending
+                assertEqual' mTime mTime'
 
         context "with preprocessors" $ do
             it "should run preprocessors" $ do
-                let source  = sourceDir </> "buildPreprocess.js.coffee"
-                let dest    = destDir   </> "buildPreprocess.js"
                 let logPath = lp "buildPreprocess.js"
 
-                _ <- buildAsset testHB logPath source [coffee]
+                Right asset <- findAsset testHB logPath
 
-                assertRanPreprocessor "coffee" dest
+                assertRanPreprocessor "coffee" (assetFilePath asset)
 
 assertRanPreprocessor :: Text -> FilePath -> Assertion
 assertRanPreprocessor ext path = do
