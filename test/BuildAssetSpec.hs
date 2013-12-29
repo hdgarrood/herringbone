@@ -29,8 +29,8 @@ spec = do
 
     withHooks $ do
         context "without preprocessors" $ do
-            let source = sourceDir </> "buildAsset.js"
-            let dest   = destDir   </> "buildAsset.js"
+            let source  = sourceDir </> "buildAsset.js"
+            let dest    = destDir   </> "buildAsset.js"
             let logPath = lp "buildAsset.js"
 
             it "should copy a source file to the destination directory" $ do
@@ -53,8 +53,8 @@ spec = do
 
         context "with preprocessors" $ do
             it "should run preprocessors" $ do
-                let source = sourceDir </> "buildPreprocess.js.coffee"
-                let dest   = destDir   </> "buildPreprocess.js"
+                let source  = sourceDir </> "buildPreprocess.js.coffee"
+                let dest    = destDir   </> "buildPreprocess.js"
                 let logPath = lp "buildPreprocess.js"
 
                 _ <- buildAsset testHB logPath source [coffee]
