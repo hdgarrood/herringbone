@@ -48,7 +48,7 @@ data_lookupPP =
 test_locateAssets :: (LogicalPath, [(FilePath, [PP])]) -> Assertion
 test_locateAssets (logPath, expected) = do
     assets <- locateAssets testHB logPath
-    assertEqualList expected assets
+    assertSameElems expected assets
 
 data_locateAssets :: [(LogicalPath, [(FilePath, [PP])])]
 data_locateAssets =

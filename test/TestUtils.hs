@@ -15,5 +15,5 @@ testWithInputs groupName f =
 assertEqual' :: (Eq a, Show a) => a -> a -> HU.Assertion
 assertEqual' = HU.assertEqual ""
 
-assertEqualList :: (Eq a, Show a, Ord a) => [a] -> [a] -> HU.Assertion
-assertEqualList xs ys = assertEqual' (sort xs) (sort ys)
+assertSameElems :: (Eq a, Show a, Ord a) => [a] -> [a] -> HU.Assertion
+assertSameElems xs ys = assertEqual' (sort xs) (sort ys)
