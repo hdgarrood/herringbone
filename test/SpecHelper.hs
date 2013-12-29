@@ -18,8 +18,10 @@ mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
                   , ppAction = \src dest -> do
                       F.copyFile src dest
+                      tr "about to run preprocessor"
                       F.withFile dest AppendMode $ \h -> do
                           hPutStrLn h $ "Ran preprocessor: " ++ T.unpack ext
+                      tr "done running preprocessor"
                       return Nothing
                   }
 

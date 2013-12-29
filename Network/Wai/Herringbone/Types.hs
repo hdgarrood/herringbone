@@ -5,7 +5,6 @@ import Data.Time.Clock
 import Data.Time.Format
 import System.Locale
 import Data.Text (Text)
-import qualified Data.Text as T
 import qualified Data.Map as M
 import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F

@@ -35,7 +35,7 @@ lookupFile hb pieces = do
     go AssetNotFound           = LRNotFound
     go (AssetCompileError err) = LRFile . assetCompileError $ err
     go (AmbiguousSources xs)   = LRFile . ambiguousSources $ xs
-        
+
     bundledAssetToLR asset = do
         file <- toFile (assetSourcePath asset)
                        (assetFilePath asset)

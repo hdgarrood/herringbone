@@ -1,7 +1,9 @@
+{-# LANGUAGE RankNTypes #-}
 -- | This module contains functions to build assets (that is, run preprocessing
 -- if necessary, and copy to destination directory).
 module Network.Wai.Herringbone.BuildAsset where
 
+import Debug.Trace
 import Data.Maybe
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
@@ -11,6 +13,9 @@ import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.Types
 import Network.Wai.Herringbone.FileSystemUtils
+
+tr :: forall m. Monad m => String -> m ()
+tr msg = trace msg (return ())
 
 -- | Build an asset to produce a 'BundledAsset'. This action checks whether the
 -- compilation is necessary based on the modified times of the source and
@@ -27,12 +32,16 @@ buildAsset hb logPath sourcePath pps = do
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
+    tr "about to compile"
     result <- if compileNeeded
                 then compileAsset sourcePath destPath workingDir pps
                 else return $ Right ()
 
+    tr "compiled the asset"
     either (return . Left)
-           (\_ -> do size <- F.getSize destPath
+           (\_ -> do tr "about to get size"
+                     size <- F.getSize destPath
+                     tr "got size"
                      return . Right $ BundledAsset
                                         size
                                         sourcePath
@@ -60,16 +69,19 @@ compileAsset :: FilePath -- ^ Source path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
 compileAsset sourcePath destPath workingPath pps = do
+    tr "got here: a"
     let tmpSource = workingPath </> F.filename sourcePath
     F.copyFile sourcePath tmpSource
+    tr "got here: b"
 
     let runPP pp = \src -> runPPinTmpDir pp src workingPath
     result <- chain (map runPP pps) tmpSource
+    tr "got here: c"
     either (return . Left)
            (\destTmp -> do F.rename destTmp destPath
                            return (Right ()))
            result
-    
+
 -- | Given a preprocessor and a file path:
 --  * run the preprocessor on the filepath,
 --  * write the result to a temporary directory
@@ -84,13 +96,15 @@ runPPinTmpDir :: PP
 runPPinTmpDir pp sourcePath workingPath = do
     let destPath = workingPath </> F.filename sourcePath
 
+    tr "got here: b0"
     result <- ppAction pp sourcePath destPath
+    tr "got here: b1"
     maybe (F.removeFile sourcePath >> return (Right destPath))
           (return . Left)
           result
 
 chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
-chain fs m     = foldr go z fs
+chain fs m = foldr go z fs
     where
         go = \f acc -> acc >>= either (return . Left) f
         z  = return (Right m)

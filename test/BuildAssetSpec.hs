@@ -30,28 +30,31 @@ spec = do
                     )
 
     withHooks $ do
-        context "without preprocessors" $ do
-            let source  = sourceDir </> "buildAsset.js"
-            let dest    = destDir   </> "buildAsset.js"
-            let logPath = lp "buildAsset.js"
+        -- context "without preprocessors" $ do
+        --     let source  = sourceDir </> "buildAsset.js"
+        --     let dest    = destDir   </> "buildAsset.js"
+        --     let logPath = lp "buildAsset.js"
 
-            it "should copy a source file to the destination directory" $ do
-                asset <- buildAsset testHB logPath source []
+        --     it "should copy a source file to the destination directory" $ do
+        --         asset <- buildAsset testHB logPath source []
 
-                assertIsRight asset
-                assertFileExists dest
-                assertFileContentsMatch source dest
+        --         assertIsRight asset
+        --         assertFileExists dest
+        --         assertFileContentsMatch source dest
 
-            it "should not modify the source file" $ do
-                _ <- buildAsset testHB logPath source []
+        --     it "should not modify the source file" $ do
+        --         _ <- buildAsset testHB logPath source []
 
-                assertFileExists source
+        --         assertFileExists source
 
-            it "should get the modification time of the source file" $ do
-                sourceMTime <- F.getModified source
-                Right asset <- buildAsset testHB logPath source []
+        --     it "should get the modification time of the source file" $ do
+        --         sourceMTime <- F.getModified source
+        --         Right asset <- buildAsset testHB logPath source []
 
-                assertEqual' sourceMTime (assetModifiedTime asset)
+        --         assertEqual' sourceMTime (assetModifiedTime asset)
+        --
+        --     it "should not compile unless necessary" $ do
+        --         pending
 
         context "with preprocessors" $ do
             it "should run preprocessors" $ do
