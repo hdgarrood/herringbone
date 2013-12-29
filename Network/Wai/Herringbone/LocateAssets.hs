@@ -19,14 +19,14 @@ locateAssets hb logPath = do
     assets <- sequence $ map (getAssetsFrom pps pathPieces) sourceDirs
     return $ concat assets
 
-getAssetsFrom :: PPs         -- ^ List of preprocessors
+getAssetsFrom :: PPs
               -> [Text]      -- ^ requested path pieces
               -> FilePath    -- ^ Directory to look in
               -> IO [(FilePath, [PP])]
 getAssetsFrom _   []          _    = return []
 getAssetsFrom pps pathPieces' dir' = do
     let pathPieces        = map F.fromText pathPieces'
-    let dir               = foldr (</>) dir' (init pathPieces)
+    let dir               = foldl (</>) dir' (init pathPieces)
     let assetName         = last pathPieces
 
     exists <- F.isDirectory dir
@@ -36,7 +36,7 @@ getAssetsFrom pps pathPieces' dir' = do
                                     pps
                                     assetName
                                     (map F.filename contents)
-                return $ map (\(path, pps) -> (dir </> path, pps)) filenames
+                return $ map (\(path, xs) -> (dir </> path, xs)) filenames
         else return []
 
 -- Given a list of preprocessors, the path of an asset we want to serve, and
