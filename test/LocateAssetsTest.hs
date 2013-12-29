@@ -8,9 +8,7 @@ import Prelude hiding (FilePath)
 import Network.Wai.Herringbone.LocateAssets
 import Network.Wai.Herringbone.Types
 import TestResources
-
-assertEqual' :: (Eq a, Show a) => a -> a -> Assertion
-assertEqual' = assertEqual ""
+import TestUtils
 
 test_getExtraExtensions :: (FilePath, FilePath, Maybe [Text]) -> Assertion
 test_getExtraExtensions (pathWithExts, path, expected) =
@@ -26,19 +24,6 @@ data_getExtraExtensions =
 test_resolvePPs :: (PPs, FilePath, FilePath, Maybe [PP]) -> Assertion
 test_resolvePPs (pps, assetPath, sourcePath, expected) =
     assertEqual' expected (resolvePPs pps assetPath sourcePath)
-
-mkMockPP :: Text -> PP
-mkMockPP ext = PP { ppExtension = ext
-                  , ppAction = \_ _ -> return Nothing }
-
-coffee :: PP
-coffee = mkMockPP "coffee"
-
-erb :: PP
-erb = mkMockPP "erb"
-
-coffeeAndErb :: PPs
-coffeeAndErb = fromList [coffee, erb]
 
 data_resolvePPs :: [(PPs, FilePath, FilePath, Maybe [PP])]
 data_resolvePPs =
@@ -63,7 +48,7 @@ data_lookupPP =
 test_locateAssets :: (LogicalPath, [(FilePath, [PP])]) -> Assertion
 test_locateAssets (logPath, expected) = do
     assets <- locateAssets testHB logPath
-    assertEqual' expected assets
+    assertEqualList expected assets
 
 data_locateAssets :: [(LogicalPath, [(FilePath, [PP])])]
 data_locateAssets =

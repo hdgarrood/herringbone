@@ -38,11 +38,13 @@ data PP = PP
     }
 
 instance Show PP where
-    show pp = "PP { ppExtension = " ++ T.unpack (ppExtension pp) ++
-                 ", ppAction = <not showable> }"
+    show pp = "<PP: " ++ show (ppExtension pp) ++ ">"
 
 instance Eq PP where
     (PP ext1 _) == (PP ext2 _) = ext1 == ext2
+
+instance Ord PP where
+    compare (PP ext1 _) (PP ext2 _) = compare ext1 ext2
 
 -- | Yes, there's a bit of redundancy here...
 newtype PPs = PPs { unPPs :: M.Map Text PP }
