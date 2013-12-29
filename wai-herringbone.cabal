@@ -16,7 +16,7 @@ source-repository head
 
 test-suite herringbone-tests
   type:                 exitcode-stdio-1.0
-  main-is:              TestMain.hs
+  main-is:              Spec.hs
   hs-source-dirs:       test .
   ghc-options:          -Wall
   build-depends:        base >=4.6 && <4.7,
@@ -34,11 +34,8 @@ test-suite herringbone-tests
                         http-types,
                         time,
                         old-locale,
-                        HUnit,
-                        QuickCheck,
-                        test-framework,
-                        test-framework-hunit,
-                        test-framework-quickcheck2
+                        hspec,
+                        HUnit
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances
