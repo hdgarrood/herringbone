@@ -1,13 +1,10 @@
 module BuildAssetSpec where
 
 import Test.Hspec
-import Test.HUnit hiding (path)
-import Data.Text (Text)
-import Filesystem.Path.CurrentOS (FilePath, (</>))
+import Filesystem.Path.CurrentOS ((</>))
 import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.BuildAsset
-import Network.Wai.Herringbone.Types
 import TestResources
 import TestUtils
 

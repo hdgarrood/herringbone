@@ -3,6 +3,7 @@
 module Network.Wai.Herringbone.BuildAsset where
 
 import Data.Maybe
+import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
@@ -22,9 +23,8 @@ buildAsset hb logPath sourcePath pps = do
     let destPath = hbDestDir hb </> toFilePath logPath
 
     sourceModifiedTime <- F.getModified sourcePath
-    destModifiedTime   <- F.getModified destPath
-    
-    let compileNeeded = sourceModifiedTime > destModifiedTime
+    compileNeeded <- shouldCompile sourceModifiedTime destPath
+
     result <- if compileNeeded
                 then compileAsset destPath sourcePath pps
                 else return $ Right ()
@@ -38,6 +38,17 @@ buildAsset hb logPath sourcePath pps = do
                                         logPath
                                         sourceModifiedTime)
            result
+
+-- | Should we compile an asset? True if either the asset doesn't exist, or if
+-- its modified time is older than the supplied source modification time.
+shouldCompile :: UTCTime -> FilePath -> IO Bool
+shouldCompile sourceModifiedTime destPath = do
+    exists <- F.isFile destPath
+    if not exists
+        then return True
+        else do
+            destModifiedTime <- F.getModified destPath
+            return $ sourceModifiedTime > destModifiedTime
 
 -- | Compile the given asset by invoking any preprocessors on the source path,
 -- and copying the result to the destination path.
