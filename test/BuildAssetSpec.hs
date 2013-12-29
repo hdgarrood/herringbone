@@ -8,11 +8,10 @@ import Network.Wai.Herringbone.BuildAsset
 import SpecHelper
 
 spec :: Spec
-spec = describe "BuildAsset" $ do
-    context "without preprocessors" $ do
-        let destDir = "test/resources/assets"
-
-        after (clean destDir) $ do
+spec = do
+    let destDir = "test/resources/assets"
+    after (clean destDir) $ do
+        context "without preprocessors" $ do
             it "should copy a source file to the destination directory" $ do
                 let source = "test/resources/assets/test.js"
                 let dest   = destDir </> "test.js"

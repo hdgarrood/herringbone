@@ -12,7 +12,7 @@ import Network.Wai.Herringbone.Types
 import SpecHelper
 
 spec :: Spec
-spec = describe "LocateAssets" $ do
+spec = do
     fromHUnitTest $ testWithInputs "getExtraExtensions"
         test_getExtraExtensions
         data_getExtraExtensions
