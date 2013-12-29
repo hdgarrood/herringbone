@@ -40,6 +40,7 @@ instance Show PP where
 
 -- | Yes, there's a bit of redundancy here...
 newtype PPs = PPs { unPPs :: M.Map Text PP }
+    deriving (Show)
 
 noPPs :: PPs
 noPPs = PPs M.empty
@@ -67,6 +68,7 @@ data Herringbone = Herringbone
     , hbDestDir    :: FilePath
     , hbPPs        :: PPs
     }
+    deriving (Show)
 
 newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
 
