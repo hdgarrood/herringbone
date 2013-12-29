@@ -32,7 +32,11 @@ getAssetsFrom pps pathPieces' dir' = do
     exists <- F.isDirectory dir
     if exists
         then do contents <- F.listDirectory dir
-                return $ getAssetsFrom' pps assetName (map F.filename contents)
+                let filenames = getAssetsFrom'
+                                    pps
+                                    assetName
+                                    (map F.filename contents)
+                return $ map (\(path, pps) -> (dir </> path, pps)) filenames
         else return []
 
 -- Given a list of preprocessors, the path of an asset we want to serve, and

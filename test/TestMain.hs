@@ -19,4 +19,7 @@ tests =
     , testWithInputs "lookupPP"
         test_lookupPP
         data_lookupPP
+    , testWithInputs "locateAssets"
+        test_locateAssets
+        data_locateAssets
     ]

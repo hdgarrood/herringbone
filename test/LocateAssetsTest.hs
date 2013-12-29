@@ -2,7 +2,7 @@ module LocateAssetsTest where
 
 import Test.HUnit hiding (path)
 import Data.Text (Text)
-import Filesystem.Path.CurrentOS (FilePath)
+import Filesystem.Path.CurrentOS (FilePath, (</>))
 import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.LocateAssets
@@ -55,12 +55,20 @@ test_lookupPP (ext, pps, expected) =
 
 data_lookupPP :: [(Text, PPs, Maybe PP)]
 data_lookupPP =
-    [ ("sass", noPPs, Nothing)
-    , ("sass", coffeeAndErb, Nothing)
-    , ("erb", coffeeAndErb, Just erb)
+    [ ("sass" , noPPs        , Nothing)
+    , ("sass" , coffeeAndErb , Nothing)
+    , ("erb"  , coffeeAndErb , Just erb)
     ]
 
 test_locateAssets :: (LogicalPath, [(FilePath, [PP])]) -> Assertion
 test_locateAssets (logPath, expected) = do
     assets <- locateAssets testHB logPath
     assertEqual' expected assets
+
+data_locateAssets :: [(LogicalPath, [(FilePath, [PP])])]
+data_locateAssets =
+    [ (lp ["test.js"], [(base </> "test.js", [])])
+    ]
+    where
+    lp = unsafeMakeLogicalPath
+    base = "test/resources/assets"
