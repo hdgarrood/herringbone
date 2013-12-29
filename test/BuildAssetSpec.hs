@@ -21,10 +21,12 @@ spec = do
     let destDir    = hbDestDir testHB
     let workingDir = hbWorkingDir testHB
 
+    let cleanEverything = clean destDir >> clean workingDir
     let withHooks = ( before (do exists <- F.isDirectory workingDir
                                  when (not exists)
-                                    (F.createDirectory False workingDir))
-                    . after  (clean destDir >> clean workingDir)
+                                    (F.createDirectory False workingDir)
+                                 cleanEverything)
+                    . after cleanEverything
                     )
 
     withHooks $ do
