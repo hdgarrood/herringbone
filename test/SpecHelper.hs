@@ -46,7 +46,11 @@ clean :: FilePath -> IO ()
 clean dir = do
     putStrLn $ "cleaning " ++ show dir ++ "..."
     items <- F.listDirectory dir
-    forM_ items F.removeTree
+    forM_ items $ \item -> do
+        isDir <- F.isDirectory item
+        if isDir
+            then F.removeTree item
+            else F.removeFile item
 
 -- Laziness
 es :: FilePath -> String

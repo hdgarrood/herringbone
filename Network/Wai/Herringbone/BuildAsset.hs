@@ -28,7 +28,7 @@ buildAsset hb logPath sourcePath pps = do
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
     result <- if compileNeeded
-                then compileAsset destPath sourcePath workingDir pps
+                then compileAsset sourcePath destPath workingDir pps
                 else return $ Right ()
 
     either (return . Left)
@@ -60,7 +60,7 @@ compileAsset :: FilePath -- ^ Source path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
 compileAsset sourcePath destPath workingPath pps = do
-    tmpSource <- makeTempFile (F.filename sourcePath) workingPath
+    let tmpSource = workingPath </> F.filename sourcePath
     F.copyFile sourcePath tmpSource
 
     let runPP pp = \src -> runPPinTmpDir pp src workingPath
@@ -82,8 +82,9 @@ runPPinTmpDir :: PP
               -> FilePath -- ^ Working path
               -> IO (Either CompileError FilePath)
 runPPinTmpDir pp sourcePath workingPath = do
-    destPath <- makeTempFile (F.filename sourcePath) workingPath
-    result   <- ppAction pp sourcePath destPath
+    let destPath = workingPath </> F.filename sourcePath
+
+    result <- ppAction pp sourcePath destPath
     maybe (F.removeFile sourcePath >> return (Right destPath))
           (return . Left)
           result

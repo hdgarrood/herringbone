@@ -7,12 +7,8 @@ import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.Types
 
--- TODO: remove?
-class ToFilePath a where
-    toFilePath :: a -> F.FilePath
-
-instance ToFilePath LogicalPath where
-    toFilePath = F.concat . map F.fromText . fromLogicalPath
+toFilePath :: LogicalPath -> FilePath
+toFilePath = F.concat . map F.fromText . fromLogicalPath
 
 makeTempFile :: FilePath -> FilePath -> IO F.FilePath
 makeTempFile sourceName workingDir = do
