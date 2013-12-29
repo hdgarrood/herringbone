@@ -90,5 +90,7 @@ runPPinTmpDir pp sourcePath workingPath = do
           result
 
 chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
-chain []     m = return (Right m)
-chain (f:fs) m = f m >>= either (return . Left) (chain fs)
+chain fs m     = foldr go z fs
+    where
+        go = \f acc -> acc >>= either (return . Left) f
+        z  = return (Right m)
