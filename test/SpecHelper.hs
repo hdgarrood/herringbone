@@ -1,4 +1,4 @@
-module TestUtils where
+module SpecHelper where
 
 import Control.Applicative
 import Control.Monad
@@ -11,7 +11,28 @@ import Filesystem.Path.CurrentOS (FilePath)
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
-import Network.Wai.Herringbone.Types
+import Network.Wai.Herringbone
+
+mkMockPP :: Text -> PP
+mkMockPP ext = PP { ppExtension = ext
+                  , ppAction = \_ _ -> return Nothing }
+
+coffee :: PP
+coffee = mkMockPP "coffee"
+
+erb :: PP
+erb = mkMockPP "erb"
+
+coffeeAndErb :: PPs
+coffeeAndErb = fromList [coffee, erb]
+
+testHB :: Herringbone
+testHB = herringbone
+    ( addSourceDir "test/resources/assets"
+    . addSourceDir "test/resources/assets2"
+    . setDestDir "test/resources/compiled_assets"
+    . addPreprocessors [coffee, erb]
+    )
 
 testWithInputs :: String -> (a -> Assertion) -> [a] -> Test
 testWithInputs groupName f =

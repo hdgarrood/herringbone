@@ -9,8 +9,7 @@ import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.LocateAssets
 import Network.Wai.Herringbone.Types
-import TestResources
-import TestUtils
+import SpecHelper
 
 spec :: Spec
 spec = describe "LocateAssets" $ do

@@ -5,8 +5,7 @@ import Filesystem.Path.CurrentOS ((</>))
 import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.BuildAsset
-import TestResources
-import TestUtils
+import SpecHelper
 
 spec :: Spec
 spec = describe "BuildAsset" $ do
