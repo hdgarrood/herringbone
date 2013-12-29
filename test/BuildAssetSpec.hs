@@ -1,15 +1,16 @@
 module BuildAssetSpec where
 
-import Test.Hspec
-import Test.HUnit hiding (path)
+import Control.Monad
+import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Filesystem.Path.CurrentOS (FilePath, (</>))
+import Prelude hiding (FilePath)
 import qualified Filesystem as F
 import qualified Data.ByteString as B
-import Data.Monoid
-import Prelude hiding (FilePath)
+import Test.Hspec
+import Test.HUnit hiding (path)
 
 import Network.Wai.Herringbone
 import SpecHelper
@@ -20,7 +21,13 @@ spec = do
     let destDir   = hbDestDir testHB
     let workingDir = hbWorkingDir testHB
 
-    after (clean destDir >> clean workingDir) $ do
+    let withHooks = ( before (do exists <- F.isDirectory workingDir
+                                 when (not exists)
+                                    (F.createDirectory False workingDir))
+                    . after  (clean destDir >> clean workingDir)
+                    )
+
+    withHooks $ do
         context "without preprocessors" $ do
             let source = sourceDir </> "buildAsset.js"
             let dest   = destDir   </> "buildAsset.js"
