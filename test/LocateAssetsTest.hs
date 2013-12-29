@@ -67,8 +67,13 @@ test_locateAssets (logPath, expected) = do
 
 data_locateAssets :: [(LogicalPath, [(FilePath, [PP])])]
 data_locateAssets =
-    [ (lp ["test.js"], [(base </> "test.js", [])])
+    [ (lp ["test.js"], [(base1 </> "test.js", [])])
+    , (lp ["style.css"], [ (base1 </> "style.css", [])
+                         , (base1 </> "style.css.erb", [erb])
+                         , (base2 </> "style.css", [])
+                         ])
     ]
     where
     lp = unsafeMakeLogicalPath
-    base = "test/resources/assets"
+    base1 = "test/resources/assets"
+    base2 = "test/resources/assets2"
