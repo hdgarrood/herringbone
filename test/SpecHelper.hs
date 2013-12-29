@@ -1,5 +1,6 @@
 module SpecHelper where
 
+import System.IO (IOMode(..), hPutStrLn)
 import Control.Applicative
 import Control.Monad
 import Data.List (sort)
@@ -15,7 +16,12 @@ import Network.Wai.Herringbone
 
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
-                  , ppAction = \_ _ -> return Nothing }
+                  , ppAction = \src dest -> do
+                      F.copyFile src dest
+                      F.withFile dest AppendMode $ \h -> do
+                          hPutStrLn h $ "Ran preprocessor: " ++ T.unpack ext
+                      return Nothing
+                  }
 
 coffee :: PP
 coffee = mkMockPP "coffee"
@@ -44,7 +50,6 @@ testWithInputs groupName f =
 
 clean :: FilePath -> IO ()
 clean dir = do
-    putStrLn $ "cleaning " ++ show dir ++ "..."
     items <- F.listDirectory dir
     forM_ items $ \item -> do
         isDir <- F.isDirectory item
