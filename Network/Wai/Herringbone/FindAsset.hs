@@ -16,7 +16,6 @@ findAsset hb path = do
         [(srcPath, pps)] -> buildAsset' hb path srcPath pps
         xs               -> return . Left $ AmbiguousSources (map fst xs)
 
-
 buildAsset' :: Herringbone
             -> LogicalPath
             -> FilePath

@@ -23,7 +23,7 @@ getAssetsFrom :: PPs         -- ^ List of preprocessors
               -> [Text]      -- ^ requested path pieces
               -> FilePath    -- ^ Directory to look in
               -> IO [(FilePath, [PP])]
-getAssetsFrom _   []           _   = return []
+getAssetsFrom _   []          _    = return []
 getAssetsFrom pps pathPieces' dir' = do
     let pathPieces        = map F.fromText pathPieces'
     let dir               = foldr (</>) dir' (init pathPieces)
@@ -32,7 +32,7 @@ getAssetsFrom pps pathPieces' dir' = do
     exists <- F.isDirectory dir
     if exists
         then do contents <- F.listDirectory dir
-                return $ getAssetsFrom' pps assetName contents
+                return $ getAssetsFrom' pps assetName (map F.filename contents)
         else return []
 
 -- Given a list of preprocessors, the path of an asset we want to serve, and

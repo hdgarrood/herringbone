@@ -2,6 +2,8 @@ module Network.Wai.Herringbone.Types where
 
 import Data.Char
 import Data.Time.Clock
+import Data.Time.Format
+import System.Locale
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Map as M
@@ -22,6 +24,7 @@ instance ToLazyByteString FilePath where
 data AssetError = AssetNotFound
                 | AssetCompileError CompileError
                 | AmbiguousSources [FilePath]
+                deriving (Show)
 
 type CompileError = String
 
@@ -71,6 +74,15 @@ data Herringbone = Herringbone
     deriving (Show)
 
 newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
+    deriving (Show)
+
+makeLogicalPath :: [Text] -> Maybe LogicalPath
+makeLogicalPath xs = if safe xs then Just $ LogicalPath xs else Nothing
+    where
+        safe = all (not . (==) "..")
+
+unsafeMakeLogicalPath :: [Text] -> LogicalPath
+unsafeMakeLogicalPath = LogicalPath
 
 data BundledAsset = BundledAsset
     { assetSize         :: Integer
@@ -84,3 +96,15 @@ data BundledAsset = BundledAsset
     , assetModifiedTime :: UTCTime
     -- ^ Modification time of the asset's source file
     }
+
+instance Show BundledAsset where
+    show (BundledAsset size sourcePath filePath logicalPath modifiedTime) =
+        "BundledAsset { " ++
+        "assetSize = " ++ show size ++ ", " ++
+        "assetSourcePath = " ++ show sourcePath ++ ", " ++
+        "assetFilePath = " ++ show filePath ++ ", " ++
+        "assetLogicalPath = " ++ show logicalPath ++ ", " ++
+        "assetModifiedTime = " ++ showTime modifiedTime ++ " }"
+
+        where
+        showTime = formatTime defaultTimeLocale (dateTimeFmt defaultTimeLocale)

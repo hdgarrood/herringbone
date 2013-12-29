@@ -1,4 +1,10 @@
-module Network.Wai.Herringbone where
+module Network.Wai.Herringbone (
+    module Network.Wai.Herringbone.Configuration,
+    module Network.Wai.Herringbone.Types,
+    module Network.Wai.Herringbone.LocateAssets,
+    module Network.Wai.Herringbone.BuildAsset,
+    module Network.Wai.Herringbone.FindAsset
+) where
 
 import Control.Monad
 import qualified Data.ByteString.Lazy as BL
@@ -19,6 +25,8 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
 import Network.Wai.Herringbone.FileSystemUtils
+import Network.Wai.Herringbone.Configuration
+import Network.Wai.Herringbone.FindAsset
 import Network.Wai.Herringbone.Types
 import Network.Wai.Herringbone.LocateAssets
 import Network.Wai.Herringbone.BuildAsset

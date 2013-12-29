@@ -14,6 +14,36 @@ source-repository head
   type:     git
   location: https://github.com/hdgarrood/wai-herringbone
 
+test-suite herringbone-tests
+  type:                 exitcode-stdio-1.0
+  main-is:              TestMain.hs
+  hs-source-dirs:       test .
+  ghc-options:          -Wall
+  build-depends:        base >=4.6 && <4.7,
+                        wai  >= 2.0 && <3,
+                        wai-app-static,
+                        text,
+                        bytestring,
+                        containers,
+                        split,
+                        system-filepath,
+                        system-fileio,
+                        directory,
+                        temporary,
+                        unix-compat,
+                        http-types,
+                        time,
+                        old-locale,
+                        HUnit,
+                        QuickCheck,
+                        test-framework,
+                        test-framework-hunit,
+                        test-framework-quickcheck2
+  default-extensions:   OverloadedStrings,
+                        TypeSynonymInstances,
+                        FlexibleInstances
+  default-language:     Haskell2010
+
 library
   ghc-options:          -Wall
   exposed-modules:      Network.Wai.Herringbone
@@ -36,6 +66,9 @@ library
                         temporary,
                         unix-compat,
                         http-types,
-                        time
-  default-extensions:   OverloadedStrings, TypeSynonymInstances, FlexibleInstances
+                        time,
+                        old-locale
+  default-extensions:   OverloadedStrings,
+                        TypeSynonymInstances,
+                        FlexibleInstances
   default-language:     Haskell2010
