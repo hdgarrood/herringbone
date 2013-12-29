@@ -74,6 +74,7 @@ insertAllPPs ppList pps = foldr insertPP pps ppList
 data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
     , hbDestDir    :: FilePath
+    , hbWorkingDir :: FilePath
     , hbPPs        :: PPs
     }
     deriving (Show)

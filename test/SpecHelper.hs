@@ -28,9 +28,10 @@ coffeeAndErb = fromList [coffee, erb]
 
 testHB :: Herringbone
 testHB = herringbone
-    ( addSourceDir "test/resources/assets"
-    . addSourceDir "test/resources/assets2"
-    . setDestDir "test/resources/compiled_assets"
+    ( addSourceDir  "test/resources/assets"
+    . addSourceDir  "test/resources/assets2"
+    . setDestDir    "test/resources/compiled_assets"
+    . setWorkingDir "test/resources/.herringbone"
     . addPreprocessors [coffee, erb]
     )
 

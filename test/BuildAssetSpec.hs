@@ -21,3 +21,6 @@ spec = do
                 assertIsRight asset
                 assertFileExists dest
                 assertFileContentsMatch source dest
+
+            it "should not modify the source file" $ do
+                pending

@@ -9,7 +9,8 @@ type ConfigBuilder = Herringbone -> Herringbone
 defaultHerringbone :: Herringbone
 defaultHerringbone = Herringbone
     { hbSourceDirs = []
-    , hbDestDir    = ""
+    , hbDestDir    = error "herringbone: destination dir must be specified"
+    , hbWorkingDir = ".herringbone"
     , hbPPs        = noPPs
     }
 
@@ -18,6 +19,9 @@ addSourceDir dir hb = hb { hbSourceDirs = dir : hbSourceDirs hb }
 
 setDestDir :: FilePath -> ConfigBuilder
 setDestDir dir hb = hb { hbDestDir = dir }
+
+setWorkingDir :: FilePath -> ConfigBuilder
+setWorkingDir dir hb = hb { hbWorkingDir = dir }
 
 addPreprocessors :: [PP] -> ConfigBuilder
 addPreprocessors ppList hb = hb { hbPPs = insertAllPPs ppList (hbPPs hb) }

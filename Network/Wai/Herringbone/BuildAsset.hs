@@ -5,6 +5,7 @@ module Network.Wai.Herringbone.BuildAsset where
 import Data.Maybe
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
+import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
@@ -21,12 +22,13 @@ buildAsset :: Herringbone
            -> IO (Either CompileError BundledAsset)
 buildAsset hb logPath sourcePath pps = do
     let destPath = hbDestDir hb </> toFilePath logPath
+    let workingDir = hbWorkingDir hb
 
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
     result <- if compileNeeded
-                then compileAsset destPath sourcePath pps
+                then compileAsset destPath sourcePath workingDir pps
                 else return $ Right ()
 
     either (return . Left)
@@ -54,12 +56,15 @@ shouldCompile sourceModifiedTime destPath = do
 -- and copying the result to the destination path.
 compileAsset :: FilePath -- ^ Source path
              -> FilePath -- ^ Dest path
+             -> FilePath -- ^ Working path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
-compileAsset destPath sourcePath pps = do
-    tmpSource <- makeTempFile
+compileAsset sourcePath destPath workingPath pps = do
+    tmpSource <- makeTempFile (F.filename sourcePath) workingPath
     F.copyFile sourcePath tmpSource
-    result <- chain (map runPPinTmpDir pps) tmpSource
+
+    let runPP pp = \src -> runPPinTmpDir pp src workingPath
+    result <- chain (map runPP pps) tmpSource
     either (return . Left)
            (\destTmp -> do F.rename destTmp destPath
                            return (Right ()))
@@ -72,11 +77,14 @@ compileAsset destPath sourcePath pps = do
 --  * and return the result path.
 --
 -- If the compilation fails, then the source file is not deleted.
-runPPinTmpDir :: PP -> FilePath -> IO (Either CompileError FilePath)
-runPPinTmpDir pp source = do
-    dest <- makeTempFile
-    result <- ppAction pp source dest
-    maybe (F.removeFile source >> return (Right dest))
+runPPinTmpDir :: PP
+              -> FilePath -- ^ Source path
+              -> FilePath -- ^ Working path
+              -> IO (Either CompileError FilePath)
+runPPinTmpDir pp sourcePath workingPath = do
+    destPath <- makeTempFile (F.filename sourcePath) workingPath
+    result   <- ppAction pp sourcePath destPath
+    maybe (F.removeFile sourcePath >> return (Right destPath))
           (return . Left)
           result
 
