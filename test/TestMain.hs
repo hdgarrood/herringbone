@@ -13,4 +13,10 @@ tests =
     [ testWithInputs "getExtraExtensions"
         test_getExtraExtensions
         data_getExtraExtensions
+    , testWithInputs "resolvePPs"
+        test_resolvePPs
+        data_resolvePPs
+    , testWithInputs "lookupPP"
+        test_lookupPP
+        data_lookupPP
     ]

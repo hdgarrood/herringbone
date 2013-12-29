@@ -69,17 +69,17 @@ getAssetsFrom' pps assetPath = catMaybes . map resolve
 -- should be applied to it to make this happen.
 resolvePPs :: PPs -> FilePath -> FilePath -> Maybe [PP]
 resolvePPs pps assetPath source = do
-    exts   <- getExtraExtensions source assetPath
+    exts   <- getExtraExtensions assetPath source
     ppList <- sequence $ map (\e -> lookupPP e pps) exts
     return ppList
 
 -- Check if a file path is formed from another file path plus a list of
 -- extensions, and if so, return those extensions, in reverse order.
 -- Eg:
---  getExtraExtensions "game.js.coffee" "game.js"     == Just ["coffee"]
---  getExtraExtensions "game.js.coffee" "style.css"   == Nothing
---  getExtraExtensions "game.js.coffee.erb" "game.js" == Just ["erb", "coffee"]
+--  getExtraExtensions "game.js" "game.js.coffee"     == Just ["coffee"]
+--  getExtraExtensions "style.css" "game.js.coffee"   == Nothing
+--  getExtraExtensions "game.js" "game.js.coffee.erb" == Just ["erb", "coffee"]
 getExtraExtensions :: FilePath -> FilePath -> Maybe [Text]
-getExtraExtensions fpWithExts fp = do
+getExtraExtensions fp fpWithExts = do
     stripped <- F.stripPrefix fp fpWithExts
     return $ (reverse . F.extensions) stripped

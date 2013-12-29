@@ -41,6 +41,9 @@ instance Show PP where
     show pp = "PP { ppExtension = " ++ T.unpack (ppExtension pp) ++
                  ", ppAction = <not showable> }"
 
+instance Eq PP where
+    (PP ext1 _) == (PP ext2 _) = ext1 == ext2
+
 -- | Yes, there's a bit of redundancy here...
 newtype PPs = PPs { unPPs :: M.Map Text PP }
     deriving (Show)
