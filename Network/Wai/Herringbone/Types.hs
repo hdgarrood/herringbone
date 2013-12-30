@@ -19,19 +19,33 @@ instance ToLazyByteString String where
     toLazyByteString = BL.pack . map (fromIntegral . ord)
 
 instance ToLazyByteString FilePath where
-    toLazyByteString = BL.fromChunks . (: []) . F.encode
+    toLazyByteString = toLazyByteString . F.encode
+
+instance ToLazyByteString B.ByteString where
+    toLazyByteString = BL.fromChunks . (: [])
 
 data AssetError = AssetNotFound
                 | AssetCompileError CompileError
                 | AmbiguousSources [FilePath]
-                deriving (Show)
+                deriving (Show, Eq)
 
-type CompileError = String
+-- | A string which should contain information about why an asset failed to
+-- compile.
+type CompileError = B.ByteString
 
--- | PP
+-- | A preprocessor something which is run on the asset before it is served.
+-- Preprocessors are run when a file extension matches the preprocessor
+-- extension. For example, if you have a preprocessor for "coffee" files, you
+-- request "application.js", and there is a file named "application.js.coffee",
+-- Herringbone will run the coffee preprocessor on that file and serve you the
+-- result.
+--
+-- You can add more preprocessors by adding more file extensions;
+-- "application.js.coffee.erb" will be preprocessed first by "erb", then by
+-- "coffee" (assuming you have registered preprocessors for those files).
 data PP = PP
     { ppExtension :: Text
-    -- ^ The file extension this preprocessor acts upon, eg "sass" or "coffee"
+    -- ^ The file extension this preprocessor acts upon, eg "sass" or "hamlet"
     , ppAction    :: B.ByteString -> IO (Either CompileError B.ByteString)
     -- ^ an function which takes a source path and a destination path and
     -- returns an action which performs the compilation
@@ -46,7 +60,7 @@ instance Eq PP where
 instance Ord PP where
     compare (PP ext1 _) (PP ext2 _) = compare ext1 ext2
 
--- | Yes, there's a bit of redundancy here...
+-- | A collection of preprocessors.
 newtype PPs = PPs { unPPs :: M.Map Text PP }
     deriving (Show)
 
@@ -78,20 +92,28 @@ data Herringbone = Herringbone
     }
     deriving (Show)
 
+-- | All assets in Herringbone are referenced by their logical path. This is
+-- the path to an asset, relative to any of the source directories.
 newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
     deriving (Show)
 
+-- | Create a LogicalPath from a list of Text values. This returns Nothing if
+-- the path would be unsafe (that is, if it contains \"..\"), to prevent
+-- directory traversal attacks.
 makeLogicalPath :: [Text] -> Maybe LogicalPath
 makeLogicalPath xs = if safe xs then Just $ LogicalPath xs else Nothing
     where
         safe = all (not . (==) "..")
 
+-- | Create a LogicalPath without checking any of the values.
 unsafeMakeLogicalPath :: [Text] -> LogicalPath
 unsafeMakeLogicalPath = LogicalPath
 
 toFilePath :: LogicalPath -> FilePath
 toFilePath = F.concat . map F.fromText . fromLogicalPath
 
+-- | A preprocessed asset. Any function that returns this will already have
+-- done the preprocessing (if necessary).
 data Asset = Asset
     { assetSize         :: Integer
     -- ^ Size of the asset in bytes
@@ -100,7 +122,7 @@ data Asset = Asset
     , assetFilePath     :: FilePath
     -- ^ Path to the preprocessed asset on disk
     , assetLogicalPath  :: LogicalPath
-    -- ^ Logical path supplied to Herringbone
+    -- ^ The logical path referencing this asset
     , assetModifiedTime :: UTCTime
     -- ^ Modification time of the asset's source file
     }

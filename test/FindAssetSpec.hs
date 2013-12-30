@@ -1,4 +1,4 @@
-module BuildAssetSpec where
+module FindAssetSpec where
 
 import Control.Monad
 import Data.Text (Text)
@@ -52,6 +52,16 @@ spec = do
 
             it "should run preprocessors in the correct order" $ do
                 testWithExpectedResult "threePreprocessors.js"
+
+        context "when there's a compile error" $ do
+            it "should report the error" $ do
+                Left result <- findAsset testHB (lp "compileError.css")
+                assertEqual' (AssetCompileError "Oh snap!") result
+
+            it "should not create the output file" $ do
+                _ <- findAsset testHB (lp "compileError.css")
+                exists <- F.isFile (destDir </> "compileError.css")
+                assert (not exists)
 
 resultsDir :: FilePath
 resultsDir = "test/resources/results"

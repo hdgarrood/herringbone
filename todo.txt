@@ -1,5 +1,3 @@
 Better name for findAsset, which implies it might do things?
-Is working directory necessary? (What does sprockets do?)
-Remove debugging code when it works
-Investigate lazy IO -- issues, solutions
 Production mode -- precompile, embed
+Declare encoding. Always Utf8 / configurable?

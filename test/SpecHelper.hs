@@ -14,6 +14,7 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
 import Network.Wai.Herringbone
+import Network.Wai.Herringbone.Types
 
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
@@ -35,12 +36,17 @@ sass = mkMockPP "sass"
 coffeeAndErb :: PPs
 coffeeAndErb = fromList [coffee, erb]
 
+failingPP :: PP
+failingPP = PP { ppExtension = "fails"
+               , ppAction = const . return . Left $ "Oh snap!"
+               }
+
 testHB :: Herringbone
 testHB = herringbone
     ( addSourceDir  "test/resources/assets"
     . addSourceDir  "test/resources/assets2"
     . setDestDir    "test/resources/compiled_assets"
-    . addPreprocessors [coffee, erb, sass]
+    . addPreprocessors [coffee, erb, sass, failingPP]
     )
 
 testWithInputs :: String -> (a -> Assertion) -> [a] -> Test

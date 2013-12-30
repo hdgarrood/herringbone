@@ -20,6 +20,7 @@ import qualified Filesystem as F
 import Network.Wai.Herringbone.FindAsset
 import Network.Wai.Herringbone.Types
 
+-- | Convert a 'Herringbone' to a WAI 'Application'.
 toApplication :: Herringbone -> Application
 toApplication hb@(Herringbone { hbDestDir = dest }) =
     staticApp $ (defaultWebAppSettings dest) { ssLookupFile = lookupFile hb }
