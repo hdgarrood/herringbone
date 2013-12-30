@@ -18,7 +18,6 @@ import Network.Wai.Herringbone
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
                   , ppAction = \sourceData -> do
-                        putStrLn $ "preprocessing: " ++ show ext
                         return . Right $
                             "Preprocessed as: " <> T.encodeUtf8 ext <> "\n" <>
                             sourceData

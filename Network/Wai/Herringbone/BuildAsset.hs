@@ -58,15 +58,14 @@ compileAsset :: FilePath -- ^ Source path
 compileAsset sourcePath destPath pps = do
     sourceData <- F.readFile sourcePath
 
-    putStrLn $ "pps: " ++ show pps
-    result <- chain (map ppAction pps) sourceData
+    result <- chainEither (map ppAction pps) sourceData
     either (return . Left)
            (\resultData -> do F.writeFile destPath resultData
                               return (Right ()))
            result
 
-chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
-chain fs m = foldl go z fs
+chainEither :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
+chainEither fs m = foldl go z fs
     where
         go = \acc f -> acc >>= either (return . Left) f
         z  = return (Right m)
