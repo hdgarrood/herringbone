@@ -10,14 +10,14 @@ import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.Types
 
--- | Build an asset to produce a 'BundledAsset'. This action checks whether the
+-- | Build an asset to produce a 'Asset'. This action checks whether the
 -- compilation is necessary based on the modified times of the source and
 -- destination files.
 buildAsset :: Herringbone
            -> LogicalPath -- ^ Logical path of asset to build
            -> FilePath    -- ^ Source file path
            -> [PP]        -- ^ List of preprocessors to run
-           -> IO (Either CompileError BundledAsset)
+           -> IO (Either CompileError Asset)
 buildAsset hb logPath sourcePath pps = do
     let destPath = hbDestDir hb </> toFilePath logPath
 
@@ -30,7 +30,7 @@ buildAsset hb logPath sourcePath pps = do
 
     either (return . Left)
            (\_ -> do size <- F.getSize destPath
-                     return . Right $ BundledAsset
+                     return . Right $ Asset
                                         size
                                         sourcePath
                                         destPath

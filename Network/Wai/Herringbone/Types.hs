@@ -92,7 +92,7 @@ unsafeMakeLogicalPath = LogicalPath
 toFilePath :: LogicalPath -> FilePath
 toFilePath = F.concat . map F.fromText . fromLogicalPath
 
-data BundledAsset = BundledAsset
+data Asset = Asset
     { assetSize         :: Integer
     -- ^ Size of the asset in bytes
     , assetSourcePath   :: FilePath
@@ -105,8 +105,8 @@ data BundledAsset = BundledAsset
     -- ^ Modification time of the asset's source file
     }
 
-instance Show BundledAsset where
-    show (BundledAsset size sourcePath filePath logicalPath modifiedTime) =
+instance Show Asset where
+    show (Asset size sourcePath filePath logicalPath modifiedTime) =
         "BundledAsset { " ++
         "assetSize = " ++ show size ++ ", " ++
         "assetSourcePath = " ++ show sourcePath ++ ", " ++

@@ -8,7 +8,7 @@ import Filesystem.Path.CurrentOS (FilePath)
 
 findAsset :: Herringbone
           -> LogicalPath
-          -> IO (Either AssetError BundledAsset)
+          -> IO (Either AssetError Asset)
 findAsset hb path = do
     assets <- locateAssets hb path
     case assets of
@@ -20,7 +20,7 @@ buildAsset' :: Herringbone
             -> LogicalPath
             -> FilePath
             -> [PP]
-            -> IO (Either AssetError BundledAsset)
+            -> IO (Either AssetError Asset)
 buildAsset' hb path srcPath pps = do
     result <- buildAsset hb path srcPath pps
     return $ mapLeft AssetCompileError result
