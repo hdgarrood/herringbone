@@ -52,14 +52,14 @@ toFile :: FilePath -- ^ source path
        -> IO File
 toFile source dest name = do
     size  <- F.getSize dest
-    mtime <- fmap toEpochTime $ F.getModified source
+    mtime <- F.getModified source
     let strDest = F.encodeString dest
     return File
         { fileGetSize     = fromIntegral size
         , fileToResponse  = \s h -> responseFile s h strDest Nothing
         , fileName        = name
         , fileGetHash     = return Nothing -- TODO
-        , fileGetModified = Just mtime
+        , fileGetModified = Just . toEpochTime $ mtime
         }
 
 toEpochTime :: UTCTime -> EpochTime
