@@ -18,6 +18,7 @@ import Network.Wai.Herringbone
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
                   , ppAction = \sourceData -> do
+                        putStrLn $ "preprocessing: " ++ show ext
                         return . Right $
                             "Preprocessed as: " <> T.encodeUtf8 ext <> "\n" <>
                             sourceData
@@ -29,6 +30,9 @@ coffee = mkMockPP "coffee"
 erb :: PP
 erb = mkMockPP "erb"
 
+sass :: PP
+sass = mkMockPP "sass"
+
 coffeeAndErb :: PPs
 coffeeAndErb = fromList [coffee, erb]
 
@@ -37,7 +41,7 @@ testHB = herringbone
     ( addSourceDir  "test/resources/assets"
     . addSourceDir  "test/resources/assets2"
     . setDestDir    "test/resources/compiled_assets"
-    . addPreprocessors [coffee, erb]
+    . addPreprocessors [coffee, erb, sass]
     )
 
 testWithInputs :: String -> (a -> Assertion) -> [a] -> Test
@@ -72,8 +76,9 @@ assertFileExists path = do
 assertFileContentsMatch :: FilePath -> FilePath -> Assertion
 assertFileContentsMatch pathA pathB = do
     matches <- (==) <$> F.readFile pathA <*> F.readFile pathB
-    assertBool ("expected the contents of " ++ es pathA ++
-                " and " ++ es pathB ++ " to be identical.") matches
+    assertBool ("expected file contents to match\n" ++
+                "this file:       " ++ es pathA ++ "\n" ++
+                "versus this one: " ++ es pathB ++ "\n") matches
 
 assertEqual' :: (Eq a, Show a) => a -> a -> Assertion
 assertEqual' = assertEqual ""

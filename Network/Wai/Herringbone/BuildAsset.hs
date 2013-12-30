@@ -9,7 +9,6 @@ import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.Types
-import Network.Wai.Herringbone.FileSystemUtils
 
 -- | Build an asset to produce a 'BundledAsset'. This action checks whether the
 -- compilation is necessary based on the modified times of the source and
@@ -59,6 +58,7 @@ compileAsset :: FilePath -- ^ Source path
 compileAsset sourcePath destPath pps = do
     sourceData <- F.readFile sourcePath
 
+    putStrLn $ "pps: " ++ show pps
     result <- chain (map ppAction pps) sourceData
     either (return . Left)
            (\resultData -> do F.writeFile destPath resultData
@@ -66,7 +66,7 @@ compileAsset sourcePath destPath pps = do
            result
 
 chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
-chain fs m = foldr go z fs
+chain fs m = foldl go z fs
     where
-        go = \f acc -> acc >>= either (return . Left) f
+        go = \acc f -> acc >>= either (return . Left) f
         z  = return (Right m)

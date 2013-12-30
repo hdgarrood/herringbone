@@ -45,8 +45,7 @@ test-suite herringbone-tests
 library
   ghc-options:          -Wall
   exposed-modules:      Network.Wai.Herringbone
-  other-modules:        Network.Wai.Herringbone.FileSystemUtils
-                        Network.Wai.Herringbone.Types
+  other-modules:        Network.Wai.Herringbone.Types
                         Network.Wai.Herringbone.Configuration
                         Network.Wai.Herringbone.LocateAssets
                         Network.Wai.Herringbone.BuildAsset

@@ -1,14 +1,10 @@
 module BuildAssetSpec where
 
 import Control.Monad
-import Data.Monoid
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import Filesystem.Path.CurrentOS (FilePath)
+import Filesystem.Path.CurrentOS (FilePath, (</>))
 import Prelude hiding (FilePath)
 import qualified Filesystem as F
-import qualified Data.ByteString as B
 import Test.Hspec
 import Test.HUnit hiding (path)
 
@@ -25,7 +21,7 @@ spec = do
 
     withHooks $ do
         context "without preprocessors" $ do
-            let logPath = lp "buildAsset.js"
+            let logPath = lp "buildNoPreprocessors.js"
 
             it "should copy a source file to the destination directory" $ do
                 asset' <- findAsset testHB logPath
@@ -51,24 +47,25 @@ spec = do
                 assertEqual' mTime mTime'
 
         context "with preprocessors" $ do
-            it "should run preprocessors" $ do
-                let logPath = lp "buildPreprocess.js"
+            it "should run a single preprocessor" $ do
+                testWithExpectedResult "onePreprocessor.js"
 
-                Right asset <- findAsset testHB logPath
+            it "should run preprocessors in the correct order" $ do
+                testWithExpectedResult "threePreprocessors.js"
 
-                assertRanPreprocessor "coffee" (assetFilePath asset)
+resultsDir :: FilePath
+resultsDir = "test/resources/results"
 
-assertRanPreprocessor :: Text -> FilePath -> Assertion
-assertRanPreprocessor ext path = do
-    contents <- fmap linesBS $ F.readFile path
-    let message = "Preprocessed as: " <> (T.encodeUtf8 ext)
-    assertBool
-        ("Preprocessor " ++ T.unpack ext ++ " was not run on " ++ es path)
-        (message `elem` contents)
-    where
-    linesBS = tokenise "\n"
-    tokenise x y =
-        let (h,t) = B.breakSubstring x y
-        in  h : if B.null t
-                then []
-                else tokenise x (B.drop (B.length x) t)
+testWithExpectedResult :: Text -> Assertion
+testWithExpectedResult logicalPathText = do
+    let logicalPath = lp logicalPathText
+    let filePath = toFilePath logicalPath
+    result <- findAsset testHB logicalPath
+    either (fail . show)
+           (assertResultMatches filePath . assetFilePath)
+           result
+
+assertResultMatches :: FilePath -> FilePath -> Assertion
+assertResultMatches resultName filePath = do
+    let resultPath = resultsDir </> resultName
+    assertFileContentsMatch resultPath filePath

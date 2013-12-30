@@ -89,6 +89,9 @@ makeLogicalPath xs = if safe xs then Just $ LogicalPath xs else Nothing
 unsafeMakeLogicalPath :: [Text] -> LogicalPath
 unsafeMakeLogicalPath = LogicalPath
 
+toFilePath :: LogicalPath -> FilePath
+toFilePath = F.concat . map F.fromText . fromLogicalPath
+
 data BundledAsset = BundledAsset
     { assetSize         :: Integer
     -- ^ Size of the asset in bytes
