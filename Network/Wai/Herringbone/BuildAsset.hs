@@ -3,19 +3,13 @@
 -- if necessary, and copy to destination directory).
 module Network.Wai.Herringbone.BuildAsset where
 
-import Debug.Trace
-import Data.Maybe
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
-import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
 import Network.Wai.Herringbone.Types
 import Network.Wai.Herringbone.FileSystemUtils
-
-tr :: forall m. Monad m => String -> m ()
-tr msg = trace msg (return ())
 
 -- | Build an asset to produce a 'BundledAsset'. This action checks whether the
 -- compilation is necessary based on the modified times of the source and
@@ -27,21 +21,16 @@ buildAsset :: Herringbone
            -> IO (Either CompileError BundledAsset)
 buildAsset hb logPath sourcePath pps = do
     let destPath = hbDestDir hb </> toFilePath logPath
-    let workingDir = hbWorkingDir hb
 
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
-    tr "about to compile"
     result <- if compileNeeded
-                then compileAsset sourcePath destPath workingDir pps
+                then compileAsset sourcePath destPath pps
                 else return $ Right ()
 
-    tr "compiled the asset"
     either (return . Left)
-           (\_ -> do tr "about to get size"
-                     size <- F.getSize destPath
-                     tr "got size"
+           (\_ -> do size <- F.getSize destPath
                      return . Right $ BundledAsset
                                         size
                                         sourcePath
@@ -65,43 +54,16 @@ shouldCompile sourceModifiedTime destPath = do
 -- and copying the result to the destination path.
 compileAsset :: FilePath -- ^ Source path
              -> FilePath -- ^ Dest path
-             -> FilePath -- ^ Working path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
-compileAsset sourcePath destPath workingPath pps = do
-    tr "got here: a"
-    let tmpSource = workingPath </> F.filename sourcePath
-    F.copyFile sourcePath tmpSource
-    tr "got here: b"
+compileAsset sourcePath destPath pps = do
+    sourceData <- F.readFile sourcePath
 
-    let runPP pp = \src -> runPPinTmpDir pp src workingPath
-    result <- chain (map runPP pps) tmpSource
-    tr "got here: c"
+    result <- chain (map ppAction pps) sourceData
     either (return . Left)
-           (\destTmp -> do F.rename destTmp destPath
-                           return (Right ()))
+           (\resultData -> do F.writeFile destPath resultData
+                              return (Right ()))
            result
-
--- | Given a preprocessor and a file path:
---  * run the preprocessor on the filepath,
---  * write the result to a temporary directory
---  * delete the source file (it's assumed to be a temporary file)
---  * and return the result path.
---
--- If the compilation fails, then the source file is not deleted.
-runPPinTmpDir :: PP
-              -> FilePath -- ^ Source path
-              -> FilePath -- ^ Working path
-              -> IO (Either CompileError FilePath)
-runPPinTmpDir pp sourcePath workingPath = do
-    let destPath = workingPath </> F.filename sourcePath
-
-    tr "got here: b0"
-    result <- ppAction pp sourcePath destPath
-    tr "got here: b1"
-    maybe (F.removeFile sourcePath >> return (Right destPath))
-          (return . Left)
-          result
 
 chain :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
 chain fs m = foldr go z fs

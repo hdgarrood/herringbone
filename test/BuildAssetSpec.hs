@@ -5,7 +5,7 @@ import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import Filesystem.Path.CurrentOS (FilePath, (</>))
+import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 import qualified Filesystem as F
 import qualified Data.ByteString as B
@@ -17,14 +17,10 @@ import SpecHelper
 
 spec :: Spec
 spec = do
-    let sourceDir  = "test/resources/assets"
     let destDir    = hbDestDir testHB
-    let workingDir = hbWorkingDir testHB
 
-    let cleanEverything = clean destDir >> clean workingDir
-    let withHooks = ( before (do F.createDirectory True workingDir
-                                 cleanEverything)
-                    . after cleanEverything
+    let withHooks = ( before (clean destDir)
+                    . after  (clean destDir)
                     )
 
     withHooks $ do
@@ -65,7 +61,7 @@ spec = do
 assertRanPreprocessor :: Text -> FilePath -> Assertion
 assertRanPreprocessor ext path = do
     contents <- fmap linesBS $ F.readFile path
-    let message = "Ran preprocessor: " <> (T.encodeUtf8 ext)
+    let message = "Preprocessed as: " <> (T.encodeUtf8 ext)
     assertBool
         ("Preprocessor " ++ T.unpack ext ++ " was not run on " ++ es path)
         (message `elem` contents)

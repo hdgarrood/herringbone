@@ -6,6 +6,7 @@ import Data.Time.Format
 import System.Locale
 import Data.Text (Text)
 import qualified Data.Map as M
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F
 import Filesystem.Path.CurrentOS (FilePath)
@@ -31,7 +32,7 @@ type CompileError = String
 data PP = PP
     { ppExtension :: Text
     -- ^ The file extension this preprocessor acts upon, eg "sass" or "coffee"
-    , ppAction    :: FilePath -> FilePath -> IO (Maybe CompileError)
+    , ppAction    :: B.ByteString -> IO (Either CompileError B.ByteString)
     -- ^ an function which takes a source path and a destination path and
     -- returns an action which performs the compilation
     }
@@ -73,7 +74,6 @@ insertAllPPs ppList pps = foldr insertPP pps ppList
 data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
     , hbDestDir    :: FilePath
-    , hbWorkingDir :: FilePath
     , hbPPs        :: PPs
     }
     deriving (Show)

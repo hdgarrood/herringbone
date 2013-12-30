@@ -1,11 +1,12 @@
 module SpecHelper where
 
-import System.IO (IOMode(..), hPutStrLn)
 import Control.Applicative
 import Control.Monad
 import Data.List (sort)
+import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import Test.HUnit hiding (path)
 import Prelude hiding (FilePath)
 import Filesystem.Path.CurrentOS (FilePath)
@@ -16,13 +17,10 @@ import Network.Wai.Herringbone
 
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
-                  , ppAction = \src dest -> do
-                      F.copyFile src dest
-                      tr "about to run preprocessor"
-                      F.withFile dest AppendMode $ \h -> do
-                          hPutStrLn h $ "Ran preprocessor: " ++ T.unpack ext
-                      tr "done running preprocessor"
-                      return Nothing
+                  , ppAction = \sourceData -> do
+                        return . Right $
+                            "Preprocessed as: " <> T.encodeUtf8 ext <> "\n" <>
+                            sourceData
                   }
 
 coffee :: PP
@@ -39,7 +37,6 @@ testHB = herringbone
     ( addSourceDir  "test/resources/assets"
     . addSourceDir  "test/resources/assets2"
     . setDestDir    "test/resources/compiled_assets"
-    . setWorkingDir "test/resources/.herringbone"
     . addPreprocessors [coffee, erb]
     )
 
