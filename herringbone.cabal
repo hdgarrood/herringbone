@@ -1,7 +1,7 @@
-name:                wai-herringbone
+name:                herringbone
 version:             0.0.1
 synopsis:            A library for compiling and serving static web assets.
-description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/wai-herringbone>.
+description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/herringbone>.
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
@@ -12,7 +12,7 @@ cabal-version:       >=1.10
 
 source-repository head
   type:     git
-  location: https://github.com/hdgarrood/wai-herringbone
+  location: https://github.com/hdgarrood/herringbone
 
 test-suite herringbone-tests
   type:                 exitcode-stdio-1.0

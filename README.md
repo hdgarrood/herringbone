@@ -1,8 +1,8 @@
-wai-herringbone
+herringbone
 ===============
 
-wai-herringbone is a Haskell/Wai library for compiling and serving web assets.
-It aims to make it dead simple to create a 'Network.Wai.Middleware' or
+herringbone is a Haskell/Wai library for compiling and serving web assets.  It
+aims to make it dead simple to create a 'Network.Wai.Middleware' or
 'Network.Wai.Application' which deals with all of your static assets, including
 preprocessing for languages like Fay, CoffeeScript, Sass, and LESS.
 
