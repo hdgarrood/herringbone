@@ -35,25 +35,27 @@ type CompileError = B.ByteString
 
 -- | A preprocessor something which is run on the asset before it is served.
 -- Preprocessors are run when a file extension matches the preprocessor
--- extension. For example, if you have a preprocessor for "coffee" files, you
--- request "application.js", and there is a file named "application.js.coffee",
--- Herringbone will run the coffee preprocessor on that file and serve you the
--- result.
+-- extension. For example, if you have a preprocessor for \"coffee\" files, you
+-- request \"application.js\", and there is a file named
+-- \"application.js.coffee\", Herringbone will run the coffee preprocessor on
+-- that file and serve you the result.
 --
 -- You can add more preprocessors by adding more file extensions;
--- "application.js.coffee.erb" will be preprocessed first by "erb", then by
--- "coffee" (assuming you have registered preprocessors for those files).
+-- \"application.js.coffee.erb\" will be preprocessed first by \"erb\", then by
+-- \"coffee\" (assuming you have registered preprocessors for those files).
 data PP = PP
     { ppExtension :: Text
-    -- ^ The file extension this preprocessor acts upon, eg "sass" or "hamlet"
+    -- ^ The file extension this preprocessor acts upon, eg \"sass\" or
+    -- \"hamlet\"
     , ppAction    :: B.ByteString -> IO (Either CompileError B.ByteString)
-    -- ^ an function which takes a source path and a destination path and
-    -- returns an action which performs the compilation
+    -- ^ Perform the preprocessing.
     }
 
 instance Show PP where
     show pp = "<PP: " ++ show (ppExtension pp) ++ ">"
 
+-- | Beware: This instance is only here for testing. It only looks at the
+-- extensions to decide whether two 'PP's are equal. Don't use this!
 instance Eq PP where
     (PP ext1 _) == (PP ext2 _) = ext1 == ext2
 
@@ -85,10 +87,16 @@ fromList ppList = insertAllPPs ppList noPPs
 insertAllPPs :: [PP] -> PPs -> PPs
 insertAllPPs ppList pps = foldr insertPP pps ppList
 
+-- | The \'main\' datatype in this library. Just a container for the
+-- configuration. All of the important functions will take a 'Herringbone' as
+-- their first argument.
 data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
+    -- ^ A list of source directories; this is where assets should be placed.
     , hbDestDir    :: FilePath
+    -- ^ Where to copy assets to after they've been compiled.
     , hbPPs        :: PPs
+    -- ^ Preprocessors
     }
     deriving (Show)
 
