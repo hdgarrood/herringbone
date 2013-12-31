@@ -124,15 +124,16 @@ toFilePath = F.concat . map F.fromText . fromLogicalPath
 -- done the preprocessing (if necessary).
 data Asset = Asset
     { assetSize         :: Integer
-    -- ^ Size of the asset in bytes
+    -- ^ Size of the asset in bytes.
     , assetSourcePath   :: FilePath
-    -- ^ Path to the asset's source file on disk
+    -- ^ Path to the asset's source file on disk.
     , assetFilePath     :: FilePath
-    -- ^ Path to the preprocessed asset on disk
+    -- ^ Path to the preprocessed asset on disk. Note that assets which do not
+    -- require preprocessing will still be copied to the destination directory.
     , assetLogicalPath  :: LogicalPath
-    -- ^ The logical path referencing this asset
+    -- ^ The logical path referencing this asset.
     , assetModifiedTime :: UTCTime
-    -- ^ Modification time of the asset's source file
+    -- ^ Modification time of the asset's source file.
     }
 
 instance Show Asset where
