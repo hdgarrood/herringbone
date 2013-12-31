@@ -9,7 +9,7 @@ It takes most of its inspiration from the Ruby library,
 
 Example:
 
-> import Network.Wai.Herringbone
+> import Web.Herringbone
 >
 > fay, sass :: PP
 >
