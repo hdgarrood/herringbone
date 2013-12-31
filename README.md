@@ -30,7 +30,7 @@ hb = herringbone
     )
 
 -- You can now access assets programmatically
-asset <- findAsset hb (makeLogicalPath ["application.js"])
+asset <- findAsset hb (fromJust . makeLogicalPath $ ["application.js"])
 
 -- Or make a WAI Application to do it for you
 app = toApplication hb
