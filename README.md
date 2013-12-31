@@ -17,22 +17,24 @@ Alpha.
 How to use it
 -------------
 
-> import Network.Wai.Herringbone
->
-> fay, sass :: PP
->
-> hb = Herringbone
-> hb = herringbone
->     ( addSourceDir "assets"
->     . setDestDir   "compiled_assets"
->     . addPreprocessors [fay, sass]
->     )
->
-> -- You can now access assets programmatically
-> asset <- findAsset hb (makeLogicalPath ["application.js"])
->
-> -- Or make a WAI Application to do it for you
-> app = toApplication hb
+```haskell
+import Network.Wai.Herringbone
+
+fay, sass :: PP
+
+hb = Herringbone
+hb = herringbone
+    ( addSourceDir "assets"
+    . setDestDir   "compiled_assets"
+    . addPreprocessors [fay, sass]
+    )
+
+-- You can now access assets programmatically
+asset <- findAsset hb (makeLogicalPath ["application.js"])
+
+-- Or make a WAI Application to do it for you
+app = toApplication hb
+```
 
 For more information, go and look at the documentation on [Hackage]!
 
