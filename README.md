@@ -1,7 +1,7 @@
 herringbone
-===============
+===========
 
-herringbone is a Haskell/Wai library for compiling and serving web assets.  It
+herringbone is a Haskell library for compiling and serving web assets.  It
 aims to make it dead simple to create a 'Network.Wai.Middleware' or
 'Network.Wai.Application' which deals with all of your static assets, including
 preprocessing for languages like Fay, CoffeeScript, Sass, and LESS.
@@ -18,7 +18,7 @@ How to use it
 -------------
 
 ```haskell
-import Network.Wai.Herringbone
+import Web.Herringbone
 
 fay, sass :: PP
 
@@ -32,7 +32,7 @@ hb = herringbone
 -- You can now access assets programmatically
 asset <- findAsset hb (fromJust . makeLogicalPath $ ["application.js"])
 
--- Or make a WAI Application to do it for you
+-- Or serve them with a Wai application
 app = toApplication hb
 ```
 

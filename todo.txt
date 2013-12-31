@@ -1,3 +1,5 @@
-Better name for findAsset, which implies it might do things?
 Production mode -- precompile, embed
 Declare encoding. Always Utf8 / configurable?
+Snap support -- Wai adapter into separate package?
+
+Better name for findAsset, which implies it might do things?
