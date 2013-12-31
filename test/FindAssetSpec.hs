@@ -8,7 +8,7 @@ import qualified Filesystem as F
 import Test.Hspec
 import Test.HUnit hiding (path)
 
-import Network.Wai.Herringbone
+import Web.Herringbone
 import SpecHelper
 
 spec :: Spec

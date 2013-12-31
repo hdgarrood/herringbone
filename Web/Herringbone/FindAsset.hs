@@ -1,10 +1,11 @@
-module Network.Wai.Herringbone.FindAsset where
+module Web.Herringbone.FindAsset where
 
-import Network.Wai.Herringbone.LocateAssets
-import Network.Wai.Herringbone.BuildAsset
-import Network.Wai.Herringbone.Types
 import Prelude hiding (FilePath)
 import Filesystem.Path.CurrentOS (FilePath)
+
+import Web.Herringbone.LocateAssets
+import Web.Herringbone.BuildAsset
+import Web.Herringbone.Types
 
 findAsset :: Herringbone
           -> LogicalPath

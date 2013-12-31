@@ -1,14 +1,13 @@
-{-# LANGUAGE RankNTypes #-}
 -- | This module contains functions to build assets (that is, run preprocessing
 -- if necessary, and copy to destination directory).
-module Network.Wai.Herringbone.BuildAsset where
+module Web.Herringbone.BuildAsset where
 
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
-import Network.Wai.Herringbone.Types
+import Web.Herringbone.Types
 
 -- | Build an asset to produce a 'Asset'. This action checks whether the
 -- compilation is necessary based on the modified times of the source and

@@ -26,10 +26,10 @@ Example:
 > -- Or make a WAI Application to do it for you
 > app = toApplication hb
 -}
-module Network.Wai.Herringbone (
+module Web.Herringbone (
     -- * Creating a Herringbone
     Herringbone(..),
-    module Network.Wai.Herringbone.Configuration,
+    module Web.Herringbone.Configuration,
     -- * Assets
     LogicalPath,
     fromLogicalPath,
@@ -45,7 +45,7 @@ module Network.Wai.Herringbone (
     toApplication
 ) where
 
-import Network.Wai.Herringbone.Configuration
-import Network.Wai.Herringbone.Types
-import Network.Wai.Herringbone.FindAsset
-import Network.Wai.Herringbone.WaiAdapter
+import Web.Herringbone.Configuration
+import Web.Herringbone.Types
+import Web.Herringbone.FindAsset
+import Web.Herringbone.Adapter.Wai

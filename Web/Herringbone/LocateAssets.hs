@@ -1,6 +1,6 @@
 -- | This module deals with locating assets on the disk, and calculating how to
 -- create assets which need preprocessing.
-module Network.Wai.Herringbone.LocateAssets where
+module Web.Herringbone.LocateAssets where
 
 import Data.Maybe
 import Data.Text (Text)
@@ -9,7 +9,7 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
-import Network.Wai.Herringbone.Types
+import Web.Herringbone.Types
 
 locateAssets :: Herringbone -> LogicalPath -> IO [(FilePath, [PP])]
 locateAssets hb logPath = do

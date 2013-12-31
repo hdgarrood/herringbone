@@ -1,4 +1,4 @@
-module Network.Wai.Herringbone.WaiAdapter where
+module Web.Herringbone.Adapter.Wai where
 
 import Control.Monad
 import qualified Data.ByteString.Lazy as BL
@@ -17,8 +17,8 @@ import Filesystem.Path.CurrentOS (FilePath)
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
-import Network.Wai.Herringbone.FindAsset
-import Network.Wai.Herringbone.Types
+import Web.Herringbone.FindAsset
+import Web.Herringbone.Types
 
 -- | Convert a 'Herringbone' to a WAI 'Application'.
 toApplication :: Herringbone -> Application

@@ -1,6 +1,6 @@
-module Network.Wai.Herringbone.Configuration where
+module Web.Herringbone.Configuration where
 
-import Network.Wai.Herringbone.Types
+import Web.Herringbone.Types
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 

@@ -7,8 +7,8 @@ import Data.Text (Text)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import Prelude hiding (FilePath)
 
-import Network.Wai.Herringbone.LocateAssets
-import Network.Wai.Herringbone.Types
+import Web.Herringbone.LocateAssets
+import Web.Herringbone.Types
 import SpecHelper
 
 spec :: Spec

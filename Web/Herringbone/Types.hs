@@ -1,4 +1,4 @@
-module Network.Wai.Herringbone.Types where
+module Web.Herringbone.Types where
 
 import Data.Char
 import Data.Time.Clock

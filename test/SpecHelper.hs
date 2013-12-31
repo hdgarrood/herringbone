@@ -13,8 +13,8 @@ import Filesystem.Path.CurrentOS (FilePath)
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
-import Network.Wai.Herringbone
-import Network.Wai.Herringbone.Types
+import Web.Herringbone
+import Web.Herringbone.Types
 
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
