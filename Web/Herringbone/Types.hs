@@ -1,5 +1,6 @@
 module Web.Herringbone.Types where
 
+import Control.Monad.Reader
 import Data.Char
 import Data.Time.Clock
 import Data.Time.Format
@@ -29,6 +30,27 @@ data AssetError = AssetNotFound
                 | AmbiguousSources [FilePath]
                 deriving (Show, Eq)
 
+-- | Data which is given to preprocessors on the off-chance that they need it
+-- (eg, Fay)
+data PPReader = PPReader
+    { ppReaderHb          :: Herringbone 
+    -- ^ The Herringbone which was used to build the asset
+    , ppReaderLogicalPath :: LogicalPath
+    -- ^ The Logical path of the requested asset.
+    , ppReaderSourcePath  :: FilePath
+    -- ^ The file path to the source file
+    , ppReaderPPs         :: [PP]
+    -- ^ Preprocessors being invoked.
+    }
+    deriving (Show, Eq)
+
+-- | A monad in which preprocessor actions happen.
+newtype PPM a = PPM { unPPM :: ReaderT PPReader IO a }
+    deriving (Monad, MonadIO, (MonadReader PPReader))
+
+runPPM :: PPM a -> PPReader -> IO a
+runPPM comp readerData = runReaderT (unPPM comp) readerData
+
 -- | A string which should contain information about why an asset failed to
 -- compile.
 type CompileError = B.ByteString
@@ -47,7 +69,7 @@ data PP = PP
     { ppExtension :: Text
     -- ^ The file extension this preprocessor acts upon, eg \"sass\" or
     -- \"hamlet\"
-    , ppAction    :: B.ByteString -> IO (Either CompileError B.ByteString)
+    , ppAction    :: B.ByteString -> PPM (Either CompileError B.ByteString)
     -- ^ Perform the preprocessing.
     }
 
@@ -64,7 +86,7 @@ instance Ord PP where
 
 -- | A collection of preprocessors.
 newtype PPs = PPs { unPPs :: M.Map Text PP }
-    deriving (Show)
+    deriving (Show, Eq)
 
 noPPs :: PPs
 noPPs = PPs M.empty
@@ -98,12 +120,12 @@ data Herringbone = Herringbone
     , hbPPs        :: PPs
     -- ^ Preprocessors
     }
-    deriving (Show)
+    deriving (Show, Eq)
 
 -- | All assets in Herringbone are referenced by their logical path. This is
 -- the path to an asset, relative to any of the source directories.
 newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
-    deriving (Show)
+    deriving (Show, Eq)
 
 -- | Create a LogicalPath from a list of Text values. This returns Nothing if
 -- the path would be unsafe (that is, if it contains \"..\"), to prevent

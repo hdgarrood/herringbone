@@ -1,5 +1,5 @@
 name:                herringbone
-version:             0.0.3
+version:             0.0.4
 synopsis:            A library for compiling and serving static web assets.
 description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/herringbone>.
 license:             MIT
@@ -25,6 +25,7 @@ test-suite herringbone-tests
                         text,
                         bytestring,
                         containers,
+                        mtl,
                         system-filepath,
                         system-fileio,
                         directory,
@@ -38,7 +39,8 @@ test-suite herringbone-tests
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances,
-                        RankNTypes
+                        RankNTypes,
+                        GeneralizedNewtypeDeriving
   default-language:     Haskell2010
 
 library
@@ -56,6 +58,7 @@ library
                         text,
                         bytestring,
                         containers,
+                        mtl,
                         system-filepath,
                         system-fileio,
                         directory,
@@ -66,5 +69,6 @@ library
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances,
-                        RankNTypes
+                        RankNTypes,
+                        GeneralizedNewtypeDeriving
   default-language:     Haskell2010

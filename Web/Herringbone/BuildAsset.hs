@@ -2,6 +2,7 @@
 -- if necessary, and copy to destination directory).
 module Web.Herringbone.BuildAsset where
 
+import Control.Monad.Reader
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F
@@ -24,7 +25,7 @@ buildAsset hb logPath sourcePath pps = do
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
     result <- if compileNeeded
-                then compileAsset sourcePath destPath pps
+                then compileAsset hb logPath sourcePath destPath pps
                 else return $ Right ()
 
     either (return . Left)
@@ -50,14 +51,24 @@ shouldCompile sourceModifiedTime destPath = do
 
 -- | Compile the given asset by invoking any preprocessors on the source path,
 -- and copying the result to the destination path.
-compileAsset :: FilePath -- ^ Source path
+compileAsset :: Herringbone
+             -> LogicalPath
+             -> FilePath -- ^ Source path
              -> FilePath -- ^ Dest path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
-compileAsset sourcePath destPath pps = do
+compileAsset hb logPath sourcePath destPath pps = do
     sourceData <- F.readFile sourcePath
 
-    result <- chainEither (map ppAction pps) sourceData
+    let computation = chainEither (map ppAction pps) sourceData
+    let readerData = PPReader
+            { ppReaderHb          = hb
+            , ppReaderLogicalPath = logPath
+            , ppReaderSourcePath  = sourcePath
+            , ppReaderPPs         = pps
+            }
+    result <- runPPM computation readerData
+
     either (return . Left)
            (\resultData -> do F.writeFile destPath resultData
                               return (Right ()))
