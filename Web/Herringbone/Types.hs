@@ -1,6 +1,7 @@
 module Web.Herringbone.Types where
 
 import Control.Monad.Reader
+import Control.Applicative
 import Data.Char
 import Data.Time.Clock
 import Data.Time.Format
@@ -44,9 +45,12 @@ data PPReader = PPReader
     }
     deriving (Show, Eq)
 
+ppReaderFileName :: PPReader -> FilePath
+ppReaderFileName = F.fromText . last . fromLogicalPath . ppReaderLogicalPath
+
 -- | A monad in which preprocessor actions happen.
 newtype PPM a = PPM { unPPM :: ReaderT PPReader IO a }
-    deriving (Monad, MonadIO, (MonadReader PPReader))
+    deriving (Functor, Applicative, Monad, MonadIO, (MonadReader PPReader))
 
 runPPM :: PPM a -> PPReader -> IO a
 runPPM comp readerData = runReaderT (unPPM comp) readerData

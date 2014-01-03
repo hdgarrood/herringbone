@@ -42,6 +42,7 @@ module Web.Herringbone (
     AssetError(..),
     CompileError,
     PPReader(..),
+    ppReaderFileName,
     PPM,
     -- * WAI
     toApplication
