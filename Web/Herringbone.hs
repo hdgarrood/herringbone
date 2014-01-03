@@ -41,6 +41,8 @@ module Web.Herringbone (
     PPs,
     AssetError(..),
     CompileError,
+    PPReader(..),
+    PPM,
     -- * WAI
     toApplication
 ) where
