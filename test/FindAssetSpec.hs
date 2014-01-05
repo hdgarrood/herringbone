@@ -1,8 +1,6 @@
 module FindAssetSpec where
 
-import Control.Monad
-import Data.Text (Text)
-import Filesystem.Path.CurrentOS (FilePath, (</>))
+import Filesystem.Path.CurrentOS ((</>))
 import Prelude hiding (FilePath)
 import qualified Filesystem as F
 import Test.Hspec
