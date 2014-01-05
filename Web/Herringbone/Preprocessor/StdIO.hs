@@ -12,7 +12,9 @@ import System.Exit
 import System.Process.ByteString
 import Web.Herringbone
 
-makeStdIOPP :: Text     -- ^ Extension name
+-- | Make a preprocessor which works over standard IO; reading input from
+-- stdin, and writing output to stdout.
+makeStdIOPP :: Text     -- ^ File extension
             -> String   -- ^ Program name
             -> [String] -- ^ Arguments
             -> PP
