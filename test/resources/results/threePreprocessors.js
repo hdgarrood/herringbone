@@ -1,4 +1,4 @@
-Preprocessed as: coffee
-Preprocessed as: erb
-Preprocessed as: sass
-this is threeProcessors.js.coffee.erb.sass
+Preprocessed as: pp1
+Preprocessed as: pp2
+Preprocessed as: pp3
+this is threeProcessors.js.pp1.pp2.pp3

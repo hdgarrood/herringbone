@@ -80,8 +80,8 @@ data PP = PP
 instance Show PP where
     show pp = "<PP: " ++ show (ppExtension pp) ++ ">"
 
--- | Beware: This instance is only here for testing. It only looks at the
--- extensions to decide whether two 'PP's are equal. Don't use this!
+-- | Beware: This instance only looks at the extensions to decide whether two
+-- 'PP's are equal.
 instance Eq PP where
     (PP ext1 _) == (PP ext2 _) = ext1 == ext2
 

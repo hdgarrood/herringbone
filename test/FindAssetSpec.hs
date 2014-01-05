@@ -13,55 +13,50 @@ import SpecHelper
 
 spec :: Spec
 spec = do
-    let destDir    = hbDestDir testHB
+    let destDir = hbDestDir testHB
 
-    let withHooks = ( before (clean destDir)
-                    . after  (clean destDir)
-                    )
+    context "without preprocessors" $ do
+        let logPath = lp "buildNoPreprocessors.js"
 
-    withHooks $ do
-        context "without preprocessors" $ do
-            let logPath = lp "buildNoPreprocessors.js"
+        it "should copy a source file to the destination directory" $ do
+            asset' <- findAsset testHB logPath
 
-            it "should copy a source file to the destination directory" $ do
-                asset' <- findAsset testHB logPath
+            assertIsRight asset'
+            let Right asset = asset'
+            assertFileExists (assetFilePath asset)
+            assertFileContentsMatch (assetSourcePath asset)
+                                    (assetFilePath asset)
 
-                assertIsRight asset'
-                let Right asset = asset'
-                assertFileExists (assetFilePath asset)
-                assertFileContentsMatch (assetSourcePath asset)
-                                        (assetFilePath asset)
+        it "should get the modification time of the source file" $ do
+            Right asset <- findAsset testHB logPath
+            sourceMTime <- F.getModified (assetSourcePath asset)
 
-            it "should get the modification time of the source file" $ do
-                Right asset <- findAsset testHB logPath
-                sourceMTime <- F.getModified (assetSourcePath asset)
+            assertEqual' sourceMTime (assetModifiedTime asset)
 
-                assertEqual' sourceMTime (assetModifiedTime asset)
+        it "should not compile unless necessary" $ do
+            Right asset  <- findAsset testHB logPath
+            mTime        <- F.getModified (assetFilePath asset)
+            Right asset' <- findAsset testHB logPath
+            mTime'       <- F.getModified (assetFilePath asset')
 
-            it "should not compile unless necessary" $ do
-                Right asset  <- findAsset testHB logPath
-                mTime        <- F.getModified (assetFilePath asset)
-                Right asset' <- findAsset testHB logPath
-                mTime'       <- F.getModified (assetFilePath asset')
+            assertEqual' mTime mTime'
 
-                assertEqual' mTime mTime'
+    context "with preprocessors" $ do
+        it "should run a single preprocessor" $ do
+            testWithExpectedResult "onePreprocessor.js"
 
-        context "with preprocessors" $ do
-            it "should run a single preprocessor" $ do
-                testWithExpectedResult "onePreprocessor.js"
+        it "should run preprocessors in the correct order" $ do
+            testWithExpectedResult "threePreprocessors.js"
 
-            it "should run preprocessors in the correct order" $ do
-                testWithExpectedResult "threePreprocessors.js"
+    context "when there's a compile error" $ do
+        it "should report the error" $ do
+            Left result <- findAsset testHB (lp "compileError.css")
+            assertEqual' (AssetCompileError "Oh snap!") result
 
-        context "when there's a compile error" $ do
-            it "should report the error" $ do
-                Left result <- findAsset testHB (lp "compileError.css")
-                assertEqual' (AssetCompileError "Oh snap!") result
-
-            it "should not create the output file" $ do
-                _ <- findAsset testHB (lp "compileError.css")
-                exists <- F.isFile (destDir </> "compileError.css")
-                assert (not exists)
+        it "should not create the output file" $ do
+            _ <- findAsset testHB (lp "compileError.css")
+            exists <- F.isFile (destDir </> "compileError.css")
+            assert (not exists)
 
 resultsDir :: FilePath
 resultsDir = "test/resources/results"

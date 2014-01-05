@@ -40,17 +40,20 @@ data_getExtraExtensions =
     , ("game.js"   , "game.js.coffee.erb" , Just ["erb", "coffee"])
     ]
 
+allPPs :: PPs
+allPPs = fromList [pp1, pp2]
+
 test_resolvePPs :: (PPs, FilePath, FilePath, Maybe [PP]) -> Assertion
 test_resolvePPs (pps, assetPath, sourcePath, expected) =
     assertEqual' expected (resolvePPs pps assetPath sourcePath)
 
 data_resolvePPs :: [(PPs, FilePath, FilePath, Maybe [PP])]
 data_resolvePPs =
-    [ (noPPs        , "test.js"   , "test.js"            , Just [])
-    , (noPPs        , "test.js"   , "test.js.coffee"     , Nothing)
-    , (coffeeAndErb , "test.js"   , "test.js.coffee"     , Just [coffee])
-    , (coffeeAndErb , "test.js"   , "test.js.coffee.erb" , Just [erb, coffee])
-    , (coffeeAndErb , "style.css" , "test.js.coffee"     , Nothing)
+    [ (noPPs  , "test.js"   , "test.js"         , Just [])
+    , (noPPs  , "test.js"   , "test.js.pp1"     , Nothing)
+    , (allPPs , "test.js"   , "test.js.pp1"     , Just [pp1])
+    , (allPPs , "test.js"   , "test.js.pp1.pp2" , Just [pp2, pp1])
+    , (allPPs , "style.css" , "test.js.pp1"     , Nothing)
     ]
 
 test_lookupPP :: (Text, PPs, Maybe PP) -> Assertion
@@ -59,9 +62,9 @@ test_lookupPP (ext, pps, expected) =
 
 data_lookupPP :: [(Text, PPs, Maybe PP)]
 data_lookupPP =
-    [ ("sass" , noPPs        , Nothing)
-    , ("sass" , coffeeAndErb , Nothing)
-    , ("erb"  , coffeeAndErb , Just erb)
+    [ ("sass" , noPPs  , Nothing)
+    , ("sass" , allPPs , Nothing)
+    , ("pp1"  , allPPs , Just pp1)
     ]
 
 test_locateAssets :: (LogicalPath, [(FilePath, [PP])]) -> Assertion
@@ -73,7 +76,7 @@ data_locateAssets :: [(LogicalPath, [(FilePath, [PP])])]
 data_locateAssets =
     [ (lp "locateAssets.js",  [(base1 </> "locateAssets.js", [])])
     , (lp "locateAssets.css", [ (base1 </> "locateAssets.css", [])
-                              , (base1 </> "locateAssets.css.erb", [erb])
+                              , (base1 </> "locateAssets.css.pp1", [pp1])
                               , (base2 </> "locateAssets.css", [])
                               ])
     , (lp "html/locateAssets.html", [(base1 </> "html/locateAssets.html", [])])

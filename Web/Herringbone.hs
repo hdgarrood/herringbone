@@ -32,6 +32,8 @@ module Web.Herringbone (
     module Web.Herringbone.Configuration,
     -- * Assets
     LogicalPath,
+    makeLogicalPath,
+    unsafeMakeLogicalPath,
     fromLogicalPath,
     toFilePath,
     Asset(..),
