@@ -6,6 +6,7 @@ import Data.Monoid
 import Network.Wai.Handler.Warp
 
 import Web.Herringbone
+import Web.Herringbone.Preprocessor.StdIO
 import Web.Herringbone.Preprocessor.CoffeeScript
 import Web.Herringbone.Preprocessor.Sass
 
@@ -31,12 +32,23 @@ failingPP = PP { ppExtension = "fails"
                , ppAction = const . return . Left $ "Oh snap!"
                }
 
+sed :: PP
+sed = makeStdIOPP "sed" "sed" ["-e", "s/e/u/"]
+
 testHB :: Herringbone
 testHB = herringbone
     ( addSourceDir  "test/resources/assets"
     . addSourceDir  "test/resources/assets2"
     . setDestDir    "test/resources/compiled_assets"
-    . addPreprocessors [pp1, pp2, pp3, failingPP, coffeeScript, sass, scss]
+    . addPreprocessors [ pp1
+                       , pp2
+                       , pp3
+                       , failingPP
+                       , coffeeScript
+                       , sass
+                       , scss
+                       , sed
+                       ]
     )
 
 runTestHB :: Int -> IO ()

@@ -2,13 +2,17 @@ module AssertionsHelper where
 
 import Control.Applicative
 import Control.Monad
+import Data.Text (Text)
 import Data.List (sort)
 import Test.HUnit hiding (path)
 import Prelude hiding (FilePath)
-import Filesystem.Path.CurrentOS (FilePath)
+import Filesystem.Path.CurrentOS (FilePath, (</>))
+import Prelude hiding (FilePath)
 import qualified Filesystem as F
 
 import LazinessHelper
+import TestHerringbone
+import Web.Herringbone
 
 testWithInputs :: String -> (a -> Assertion) -> [a] -> Test
 testWithInputs groupName f =
@@ -16,6 +20,23 @@ testWithInputs groupName f =
     where
         mkTest (name, input) = TestLabel name (TestCase (f input))
         assignName n input   = ("input #" ++ show n, input)
+
+resultsDir :: FilePath
+resultsDir = "test/resources/results"
+
+testWithExpectedResult :: Text -> Assertion
+testWithExpectedResult logicalPathText = do
+    let logicalPath = lp logicalPathText
+    let filePath = toFilePath logicalPath
+    result <- findAsset testHB logicalPath
+    either (fail . show)
+           (assertResultMatches filePath . assetFilePath)
+           result
+
+assertResultMatches :: FilePath -> FilePath -> Assertion
+assertResultMatches resultName filePath = do
+    let resultPath = resultsDir </> resultName
+    assertFileContentsMatch resultPath filePath
 
 -- Extra assertions
 assertFileExists :: FilePath -> Assertion

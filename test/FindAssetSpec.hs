@@ -57,20 +57,3 @@ spec = do
             _ <- findAsset testHB (lp "compileError.css")
             exists <- F.isFile (destDir </> "compileError.css")
             assert (not exists)
-
-resultsDir :: FilePath
-resultsDir = "test/resources/results"
-
-testWithExpectedResult :: Text -> Assertion
-testWithExpectedResult logicalPathText = do
-    let logicalPath = lp logicalPathText
-    let filePath = toFilePath logicalPath
-    result <- findAsset testHB logicalPath
-    either (fail . show)
-           (assertResultMatches filePath . assetFilePath)
-           result
-
-assertResultMatches :: FilePath -> FilePath -> Assertion
-assertResultMatches resultName filePath = do
-    let resultPath = resultsDir </> resultName
-    assertFileContentsMatch resultPath filePath
