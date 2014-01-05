@@ -7,6 +7,7 @@ import Network.Wai.Handler.Warp
 
 import Web.Herringbone
 import Web.Herringbone.Preprocessor.CoffeeScript
+import Web.Herringbone.Preprocessor.Sass
 
 mkMockPP :: Text -> PP
 mkMockPP ext = PP { ppExtension = ext
@@ -35,7 +36,7 @@ testHB = herringbone
     ( addSourceDir  "test/resources/assets"
     . addSourceDir  "test/resources/assets2"
     . setDestDir    "test/resources/compiled_assets"
-    . addPreprocessors [pp1, pp2, pp3, failingPP, coffeeScript]
+    . addPreprocessors [pp1, pp2, pp3, failingPP, coffeeScript, sass, scss]
     )
 
 runTestHB :: Int -> IO ()

@@ -50,6 +50,7 @@ library
   ghc-options:          -Wall
   exposed-modules:      Web.Herringbone,
                         Web.Herringbone.Preprocessor.StdIO
+                        Web.Herringbone.Preprocessor.Sass
                         Web.Herringbone.Preprocessor.CoffeeScript
   other-modules:        Web.Herringbone.Types
                         Web.Herringbone.Configuration
