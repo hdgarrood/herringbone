@@ -3,6 +3,7 @@ module TestHerringbone where
 import Data.Text (Text)
 import qualified Data.Text.Encoding as T
 import Data.Monoid
+import Network.Wai
 import Network.Wai.Handler.Warp
 
 import Web.Herringbone
@@ -51,11 +52,26 @@ testHB = herringbone
                        ]
     )
 
+
 testHBVerbose :: Herringbone
 testHBVerbose = setVerbose testHB
 
-runTestHB :: Int -> IO ()
-runTestHB port = run port (toApplication testHB)
+testServerPort :: Int
+testServerPort = 3002
 
-runTestHBVerbose :: Int -> IO ()
-runTestHBVerbose port = run port (toApplication testHBVerbose)
+runTestHB :: IO ()
+runTestHB = runWithMsg
+    testServerPort
+    "normal"
+    (toApplication testHB)
+
+runTestHBVerbose :: IO ()
+runTestHBVerbose = runWithMsg
+    testServerPort
+    "verbose"
+    (toApplication testHBVerbose)
+
+runWithMsg :: Int -> String -> Application -> IO ()
+runWithMsg port appName app = do
+    putStrLn $ "starting " ++ appName ++ " app on port " ++ show port ++ "..."
+    run port app
