@@ -51,5 +51,11 @@ testHB = herringbone
                        ]
     )
 
+testHBVerbose :: Herringbone
+testHBVerbose = setVerbose testHB
+
 runTestHB :: Int -> IO ()
 runTestHB port = run port (toApplication testHB)
+
+runTestHBVerbose :: Int -> IO ()
+runTestHBVerbose port = run port (toApplication testHBVerbose)

@@ -23,9 +23,14 @@ setDestDir dir hb = hb { hbDestDir = dir }
 addPreprocessors :: [PP] -> ConfigBuilder
 addPreprocessors ppList hb = hb { hbPPs = insertAllPPs ppList (hbPPs hb) }
 
+-- | Displays detailed (debugging) log information during requests.
+setVerbose :: ConfigBuilder
+setVerbose conf = conf { hbVerbose = True }
+
 defaultHerringbone :: Herringbone
 defaultHerringbone = Herringbone
     { hbSourceDirs = []
     , hbDestDir    = error "herringbone: destination dir must be specified"
     , hbPPs        = noPPs
+    , hbVerbose    = False
     }

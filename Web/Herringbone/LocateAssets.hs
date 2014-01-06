@@ -15,9 +15,15 @@ locateAssets :: Herringbone -> LogicalPath -> IO [(FilePath, [PP])]
 locateAssets hb logPath = do
     let sourceDirs = hbSourceDirs hb
     let pps        = hbPPs hb
-    let pathPieces = fromLogicalPath logPath
-    assets <- sequence $ map (getAssetsFrom pps pathPieces) sourceDirs
-    return $ concat assets
+    let pcs        = fromLogicalPath logPath
+    assets <- fmap concat . sequence $ map (getAssetsFrom pps pcs) sourceDirs
+
+    verbosePut hb $ case assets of
+        []  -> "no assets found matching: " ++ show pcs
+        [x] -> "found an asset matching " ++ show pcs ++ ": " ++ show x
+        xs  -> "found assets matching " ++ show pcs ++ ": " ++ show xs
+
+    return assets
 
 getAssetsFrom :: PPs
               -> [Text]      -- ^ requested path pieces

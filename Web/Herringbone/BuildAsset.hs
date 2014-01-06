@@ -20,13 +20,21 @@ buildAsset :: Herringbone
            -> IO (Either CompileError Asset)
 buildAsset hb logPath sourcePath pps = do
     let destPath = hbDestDir hb </> toFilePath logPath
+    verbosePut hb $ "destination path is: " ++ show destPath
 
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath
 
     result <- if compileNeeded
-                then compileAsset hb logPath sourcePath destPath pps
-                else return $ Right ()
+                then do
+                    verbosePut hb $
+                        "compiling asset since source path is newer " ++
+                        "than destination file"
+                    compileAsset hb logPath sourcePath destPath pps
+                else do
+                    verbosePut hb $ "compile not needed; source path " ++
+                        "is older than destination path"
+                    return $ Right ()
 
     either (return . Left)
            (\_ -> do size <- F.getSize destPath

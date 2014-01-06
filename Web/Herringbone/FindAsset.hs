@@ -1,7 +1,9 @@
 module Web.Herringbone.FindAsset where
 
+import Control.Monad (when)
 import Prelude hiding (FilePath)
 import Filesystem.Path.CurrentOS (FilePath)
+import System.IO hiding (FilePath)
 
 import Web.Herringbone.LocateAssets
 import Web.Herringbone.BuildAsset
@@ -12,10 +14,13 @@ findAsset :: Herringbone
           -> IO (Either AssetError Asset)
 findAsset hb path = do
     assets <- locateAssets hb path
-    case assets of
-        []               -> return . Left $ AssetNotFound
-        [(srcPath, pps)] -> buildAsset' hb path srcPath pps
-        xs               -> return . Left $ AmbiguousSources (map fst xs)
+    let result = case assets of
+            []               -> return . Left $ AssetNotFound
+            [(srcPath, pps)] -> buildAsset' hb path srcPath pps
+            xs               -> return . Left $ AmbiguousSources (map fst xs)
+
+    when (hbVerbose hb) $ hFlush stdout
+    result
 
 buildAsset' :: Herringbone
             -> LogicalPath

@@ -123,8 +123,14 @@ data Herringbone = Herringbone
     -- ^ Where to copy assets to after they've been compiled.
     , hbPPs        :: PPs
     -- ^ Preprocessors
+    , hbVerbose    :: Bool
+    -- ^ Dump debugging data to stdout on every request.
     }
     deriving (Show, Eq)
+
+-- | Log a message to stdout if hbVerbose is enabled.
+verbosePut :: Herringbone -> String -> IO ()
+verbosePut hb msg = when (hbVerbose hb) $ putStrLn ("herringbone: " ++ msg)
 
 -- | All assets in Herringbone are referenced by their logical path. This is
 -- the path to an asset, relative to any of the source directories.
