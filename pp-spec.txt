@@ -1,0 +1,43 @@
+Requirements:
+
+* completely specify which PPs to run from file name
+* Go in both directions (ie: given a logical path, work out what PPs + source
+  file it is; given a source path, work out what PPs and logical path it has)
+* The source for a preprocessed asset should not be accessible
+* Should be sufficiently flexible to allow 'Mod.hs' <-> 'Mod.js'
+* The files accessible from going forwards and backwards should be the same
+
+Nice to haves:
+* Ability to run multiple preprocessors
+
+Possible implementation: pps have source ext and dest ext. Eg: 'hs' -> 'js'
+---------------------------------------------------------------------------
+
+Restrictions:
+* May only have one pp per source ext (although may have many per dest ext)
+
+Running forwards: given source path 'Mod.hs' and pp 'hs' -> 'js'
+----------------------------------------------------------------
+
+let pp = preprocessor which works on 'hs' files
+if pp?
+    run pp on Mod.hs giving Mod.js
+else
+    Mod.hs should be served as-is.
+
+Running backwards: given logical path 'Mod.js'
+----------------------------------------------
+
+Possible sources:
+    Mod.js, no PP
+    Mod.<any source extension from a pp producing 'js'>, that PP
+
+If exactly one of these exists, use it. Otherwise error.
+
+Running backwards: Given logical path 'Mod.hs'
+----------------------------------------------
+
+if PP exists from 'hs'
+    Not found
+else
+    run normally (see above)

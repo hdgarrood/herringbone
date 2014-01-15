@@ -3,11 +3,12 @@ module Web.Herringbone.Types where
 import Control.Monad.Reader
 import Control.Applicative
 import Data.Char
+import Data.Maybe
 import Data.Time.Clock
 import Data.Time.Format
 import System.Locale
+import System.IO hiding (FilePath)
 import Data.Text (Text)
-import qualified Data.Map as M
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F
@@ -43,7 +44,6 @@ data PPReader = PPReader
     , ppReaderPPs         :: [PP]
     -- ^ Preprocessors being invoked.
     }
-    deriving (Show, Eq)
 
 ppReaderFileName :: PPReader -> FilePath
 ppReaderFileName = F.fromText . last . fromLogicalPath . ppReaderLogicalPath
@@ -55,67 +55,99 @@ newtype PPM a = PPM { unPPM :: ReaderT PPReader IO a }
 runPPM :: PPM a -> PPReader -> IO a
 runPPM comp readerData = runReaderT (unPPM comp) readerData
 
+-- | A preprocessor something which is run on the asset before it is served.
+-- Preprocessors are run when a file matches its rule.  For example, if you
+-- have a preprocessor which takes \"coffee\" files and emits \"js\" files,
+-- there is a file named \"application.coffee\", and you request
+-- \"application.js\", Herringbone will run the coffee preprocessor on that
+-- \"application.coffee\" and serve you the result.
+data PP = PP
+    { ppSpec   :: PPSpec
+    , ppAction :: PPAction
+    }
+
+instance Show PP where
+    show (PP spec _) = "PP { ppSpec = " ++ show spec ++ ", ppAction = <???> }"
+
+-- | A function which performs the compilation.
+type PPAction = B.ByteString -> PPM (Either CompileError B.ByteString)
+
 -- | A string which should contain information about why an asset failed to
 -- compile.
 type CompileError = B.ByteString
 
--- | A preprocessor something which is run on the asset before it is served.
--- Preprocessors are run when a file extension matches the preprocessor
--- extension. For example, if you have a preprocessor for \"coffee\" files, you
--- request \"application.js\", and there is a file named
--- \"application.js.coffee\", Herringbone will run the coffee preprocessor on
--- that file and serve you the result.
---
--- You can add more preprocessors by adding more file extensions;
--- \"application.js.coffee.erb\" will be preprocessed first by \"erb\", then by
--- \"coffee\" (assuming you have registered preprocessors for those files).
-data PP = PP
-    { ppExtension :: Text
-    -- ^ The file extension this preprocessor acts upon, eg \"sass\" or
-    -- \"hamlet\"
-    , ppAction    :: B.ByteString -> PPM (Either CompileError B.ByteString)
-    -- ^ Perform the preprocessing.
-    }
+-- | Information describing a preprocessor.
+data PPSpec = PPSpec
+    { ppName     :: Text
+    -- ^ Identifies a preprocessor. Mainly useful for debugging compile errors.
+    , ppConsumes :: Text
+    -- ^ Extension for files this preprocessor consumes.
+    , ppProduces :: Text
+    -- ^ Extension for files this preprocessor produces.
+    } deriving (Show, Eq, Ord)
 
-instance Show PP where
-    show pp = "<PP: " ++ show (ppExtension pp) ++ ">"
-
--- | Beware: This instance only looks at the extensions to decide whether two
--- 'PP's are equal.
-instance Eq PP where
-    (PP ext1 _) == (PP ext2 _) = ext1 == ext2
-
-instance Ord PP where
-    compare (PP ext1 _) (PP ext2 _) = compare ext1 ext2
-
--- | A collection of preprocessors.
-newtype PPs = PPs { unPPs :: M.Map Text PP }
-    deriving (Show, Eq)
+-- | A collection of preprocessors. This can store many preprocessors which
+-- produce files with the same extension, but may not store more than one
+-- preprocessor which consumes files of a particular extension.
+newtype PPs = PPs { unPPs :: [PP] }
+    deriving (Show)
 
 noPPs :: PPs
-noPPs = PPs M.empty
+noPPs = PPs []
 
-supportedBy :: PPs -> Text -> Bool
-supportedBy pps = flip M.member (unPPs pps)
+-- | Given a file extension, find the preprocessor (if any) which consumes it.
+lookupConsumer :: PPs -> Text -> Maybe PP
+lookupConsumer pps ext = case filter (consumes ext) (unPPs pps) of
+    []  -> Nothing
+    [x] -> Just x
+    xs  -> error $
+        "herringbone: lookupConsumer got " ++ show xs ++ ". This is a bug. :(\
+        \ Please report it: <https://github.com/hdgarrood/herringbone>"
+    where
+    consumes e = (==) e . ppConsumes . ppSpec
 
-supportedExts :: PPs -> [Text]
-supportedExts = M.keys . unPPs
+-- | Given a file extension, find the preprocessors which can produce it.
+lookupProducers :: PPs -> Text -> [PP]
+lookupProducers pps ext = filter (produces ext) $ unPPs pps
+    where
+    produces e = (==) e . ppProduces . ppSpec
 
-insertPP :: PP -> PPs -> PPs
-insertPP pp = PPs . M.insert (ppExtension pp) pp . unPPs
+-- | Inserts a preprocessor into a PPs safely.
+insertPP :: PP -> PPs -> Maybe PPs
+insertPP pp pps = do
+    let newExt = ppConsumes $ ppSpec pp
+    guard (not . hasConsumerOf newExt $ pps)
+    return $ unsafeInsertPP pp pps
+    where
+    hasConsumerOf e = isJust . flip lookupConsumer e
 
-lookupPP :: Text -> PPs -> Maybe PP
-lookupPP ext = M.lookup ext . unPPs
+-- | Inserts a preprocessor into a PPs unsafely.
+unsafeInsertPP :: PP -> PPs -> PPs
+unsafeInsertPP pp (PPs pps) = PPs (pps ++ [pp])
 
-fromList :: [PP] -> PPs
+-- | Turn a list of PPs into a proper 'PPs'.
+fromList :: [PP] -> Maybe PPs
 fromList ppList = insertAllPPs ppList noPPs
 
-insertAllPPs :: [PP] -> PPs -> PPs
-insertAllPPs ppList pps = foldr insertPP pps ppList
+insertAllPPs :: [PP] -> PPs -> Maybe PPs
+insertAllPPs ppList pps = allInserts pps
+    where
+    inserts    = map insertPP ppList
+    allInserts = foldl (>=>) (Just) inserts
 
--- | The \'main\' datatype in this library. Just a container for the
--- configuration. All of the important functions will take a 'Herringbone' as
--- their first argument.
+-- | Turn a list of PPs into a proper 'PPs', raising an error if they cannot be
+-- converted.
+fromList' :: [PP] -> PPs
+fromList' = fromJust . fromList
+
+-- | A BuildSpec specifies how an asset should be built.
+data BuildSpec = BuildSpec
+                    FilePath    -- ^ Source path (relative)
+                    FilePath    -- ^ Destination path (again, relative)
+                    (Maybe PP)  -- ^ Preprocessor to run (if any)
+
+-- | The \'main\' datatype in this library. Contains all configuration.  All of
+-- the important functions will take a 'Herringbone' as their first argument.
 data Herringbone = Herringbone
     { hbSourceDirs :: [FilePath]
     -- ^ A list of source directories; this is where assets should be placed.
@@ -126,11 +158,13 @@ data Herringbone = Herringbone
     , hbVerbose    :: Bool
     -- ^ Dump debugging data to stdout on every request.
     }
-    deriving (Show, Eq)
+    deriving (Show)
 
 -- | Log a message to stdout if hbVerbose is enabled.
 verbosePut :: Herringbone -> String -> IO ()
-verbosePut hb msg = when (hbVerbose hb) $ putStrLn ("herringbone: " ++ msg)
+verbosePut hb msg = when (hbVerbose hb) $ do
+    putStrLn ("herringbone: " ++ msg)
+    hFlush stdout
 
 -- | All assets in Herringbone are referenced by their logical path. This is
 -- the path to an asset, relative to any of the source directories.
