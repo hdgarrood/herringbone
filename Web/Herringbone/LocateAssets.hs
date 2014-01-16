@@ -12,53 +12,80 @@ import Prelude hiding (FilePath)
 
 import Web.Herringbone.Types
 
-getBuildSpecBackwards :: Herringbone
-                      -> LogicalPath
-                      -> IO [BuildSpec]
-getBuildSpecBackwards hb path = do
+-- | Calculates a list of BuildSpecs that could be used to build the asset with
+-- the given logical path.
+locateAssets :: Herringbone -> LogicalPath -> IO [BuildSpec]
+locateAssets hb =
+    undefined
+
+-- do
+--     specs <- getBuildSpecsBackwards hb logPath
+--     fullSpecs <- sequence $ map (locateFiles hb) specs
+--     return $ catMaybes fullSpecs
+
+-- | Calculates a list of BuildSpecs that could be used to build the asset with
+-- the given source path.
+locateAssetsReverse :: Herringbone -> FilePath -> IO (Maybe BuildSpec)
+locateAssetsReverse hb sourcePath =
+    return spec
+        >>= makeDestAbsolute hb
+        >>= locateSource hb
+    where
+    spec = getBuildSpecForwards hb sourcePath
+
+getBuildSpecsBackwards :: Herringbone
+                       -> LogicalPath
+                       -> [BuildSpec]
+getBuildSpecsBackwards hb path = do
     undefined
 
 getBuildSpecForwards :: Herringbone
                      -> FilePath
-                     -> IO [BuildSpec]
-getBuildSpecForwards hb sourcePath = return [spec]
+                     -> BuildSpec
+getBuildSpecForwards hb sourcePath = BuildSpec sourcePath destPath pp
     where
     (destPath, pp) =
         fromMaybe (sourcePath, Nothing) $ do
-            extension <- F.extension path
-            pp <- lookupConsumer (hbPPs hb)
-            destPath <- swapExtensionFor pp sourcePath
-            return (destPath, Just pp)
-    spec = BuildSpec sourcePath destPath pp
+            extension <- F.extension sourcePath
+            pp' <- lookupConsumer (hbPPs hb) extension
+            destPath' <- swapExtensionForwards pp' sourcePath
+            return (destPath', Just pp')
 
-serveWithPP :: Herringbone
-            -> FilePath
-            -> Maybe PP
-            -> IO [BuildSpec]
-serveWithPP hb path pp' = do
-    fullSourcePath' <- searchForFile (hbSourceDirs hb) path
-    maybe (return [])
-          (\fullSourcePath -> do
-                fullDestPath <- F.canonicalizePath $ hbDestDir hb </> destPath
-                let spec = BuildSpec fullSourcePath fullDestPath pp'
-                return [spec])
-          fullSourcePath'
+-- | Make the destination path of a BuildSpec absolute, using the destination
+-- directory of the given Herringbone.
+makeDestAbsolute :: Herringbone
+                 -> BuildSpec
+                 -> IO BuildSpec
+makeDestAbsolute hb (BuildSpec sourcePath destPath pp) = do
+    fullDestDir <- F.canonicalizePath $ hbDestDir hb
+    let fullDestPath = fullDestDir </> destPath
+    return $ BuildSpec sourcePath fullDestPath pp
 
-    where
-    destPath = case pp' of
-        Just pp -> fromJust $ swapExtensionFor pp path
-        Nothing -> path
+-- | Search through the Herringbone's source paths to find the absolute path of
+-- the referenced source file.
+locateSource :: Herringbone
+             -> BuildSpec
+             -> IO (Maybe BuildSpec)
+locateSource hb (BuildSpec sourcePath destPath pp) = do
+    fullSourcePath <- searchForFile (hbSourceDirs hb) sourcePath
+    return $ fmap (\sp -> BuildSpec sp destPath pp) fullSourcePath
+
+swapExtensionBackwards :: PP -> FilePath -> Maybe FilePath
+swapExtensionBackwards pp =
+    swapExtension
+        (ppProduces . ppSpec $ pp)
+        (ppConsumes . ppSpec $ pp)
+
+swapExtensionForwards :: PP -> FilePath -> Maybe FilePath
+swapExtensionForwards pp =
+    swapExtension
+        (ppConsumes . ppSpec $ pp)
+        (ppProduces . ppSpec $ pp)
 
 swapExtension :: Text -> Text -> FilePath -> Maybe FilePath
 swapExtension fromExt toExt path = do
     guard $ F.hasExtension path fromExt
     return $ F.replaceExtension path toExt
-
-swapExtensionFor :: PP -> FilePath -> Maybe FilePath
-swapExtensionFor pp =
-    swapExtension
-        (ppConsumes . ppSpec $ pp)
-        (ppProduces . ppSpec $ pp)
 
 -- | Search for a file in a list of search paths. For example, if
 -- @assets/test.txt@ exists, then

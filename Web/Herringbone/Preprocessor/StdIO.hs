@@ -14,12 +14,12 @@ import Web.Herringbone
 
 -- | Make a preprocessor which works over standard IO; reading input from
 -- stdin, and writing output to stdout.
-makeStdIOPP :: Text     -- ^ File extension
+makeStdIOPP :: PPSpec 
             -> String   -- ^ Program name
             -> [String] -- ^ Arguments
             -> PP
-makeStdIOPP ext progname args = PP
-    { ppExtension = ext
+makeStdIOPP spec progname args = PP
+    { ppSpec   = spec
     , ppAction = compile progname args
     }
     

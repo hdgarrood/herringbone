@@ -40,11 +40,11 @@ module Web.Herringbone (
     findAsset,
     -- * Preprocessors
     PP(..),
+    PPSpec(..),
     PPs,
     AssetError(..),
     CompileError,
     PPReader(..),
-    ppReaderFileName,
     PPM,
     -- * WAI
     toApplication

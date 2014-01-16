@@ -3,6 +3,7 @@
 module Web.Herringbone.BuildAsset where
 
 import Control.Monad.Reader
+import Data.Maybe
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F
@@ -10,17 +11,14 @@ import Prelude hiding (FilePath)
 
 import Web.Herringbone.Types
 
--- | Build an asset to produce a 'Asset'. This action checks whether the
--- compilation is necessary based on the modified times of the source and
--- destination files.
+-- | Build an asset based on a BuildSpec to produce a 'Asset'. This action
+-- checks whether the compilation is necessary based on the modified times of
+-- the source and destination files.
 buildAsset :: Herringbone
-           -> LogicalPath -- ^ Logical path of asset to build
-           -> FilePath    -- ^ Source file path
-           -> [PP]        -- ^ List of preprocessors to run
+           -> BuildSpec
            -> IO (Either CompileError Asset)
-buildAsset hb logPath sourcePath pps = do
-    let destPath = hbDestDir hb </> toFilePath logPath
-    verbosePut hb $ "destination path is: " ++ show destPath
+buildAsset hb spec@(BuildSpec sourcePath destPath pp) = do
+    verbosePut hb $ "building from: " ++ show spec
 
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath
@@ -30,7 +28,7 @@ buildAsset hb logPath sourcePath pps = do
                     verbosePut hb $
                         "compiling asset since source path is newer " ++
                         "than destination file"
-                    compileAsset hb logPath sourcePath destPath pps
+                    compileAsset hb sourcePath destPath (maybeToList pp)
                 else do
                     verbosePut hb $ "compile not needed; source path " ++
                         "is older than destination path"
@@ -42,7 +40,6 @@ buildAsset hb logPath sourcePath pps = do
                                         size
                                         sourcePath
                                         destPath
-                                        logPath
                                         sourceModifiedTime)
            result
 
@@ -60,18 +57,16 @@ shouldCompile sourceModifiedTime destPath = do
 -- | Compile the given asset by invoking any preprocessors on the source path,
 -- and copying the result to the destination path.
 compileAsset :: Herringbone
-             -> LogicalPath
              -> FilePath -- ^ Source path
              -> FilePath -- ^ Dest path
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
-compileAsset hb logPath sourcePath destPath pps = do
+compileAsset hb sourcePath destPath pps = do
     sourceData <- F.readFile sourcePath
 
     let computation = chainEither (map ppAction pps) sourceData
     let readerData = PPReader
             { ppReaderHb          = hb
-            , ppReaderLogicalPath = logPath
             , ppReaderSourcePath  = sourcePath
             , ppReaderPPs         = pps
             }

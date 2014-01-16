@@ -37,16 +37,11 @@ data AssetError = AssetNotFound
 data PPReader = PPReader
     { ppReaderHb          :: Herringbone 
     -- ^ The Herringbone which was used to build the asset
-    , ppReaderLogicalPath :: LogicalPath
-    -- ^ The Logical path of the requested asset.
     , ppReaderSourcePath  :: FilePath
     -- ^ The file path to the source file
     , ppReaderPPs         :: [PP]
     -- ^ Preprocessors being invoked.
     }
-
-ppReaderFileName :: PPReader -> FilePath
-ppReaderFileName = F.fromText . last . fromLogicalPath . ppReaderLogicalPath
 
 -- | A monad in which preprocessor actions happen.
 newtype PPM a = PPM { unPPM :: ReaderT PPReader IO a }
@@ -145,6 +140,7 @@ data BuildSpec = BuildSpec
                     FilePath    -- ^ Source path (relative)
                     FilePath    -- ^ Destination path (again, relative)
                     (Maybe PP)  -- ^ Preprocessor to run (if any)
+                    deriving (Show)
 
 -- | The \'main\' datatype in this library. Contains all configuration.  All of
 -- the important functions will take a 'Herringbone' as their first argument.
@@ -196,19 +192,16 @@ data Asset = Asset
     , assetFilePath     :: FilePath
     -- ^ Path to the preprocessed asset on disk. Note that assets which do not
     -- require preprocessing will still be copied to the destination directory.
-    , assetLogicalPath  :: LogicalPath
-    -- ^ The logical path referencing this asset.
     , assetModifiedTime :: UTCTime
     -- ^ Modification time of the asset's source file.
     }
 
 instance Show Asset where
-    show (Asset size sourcePath filePath logicalPath modifiedTime) =
+    show (Asset size sourcePath filePath modifiedTime) =
         "BundledAsset { " ++
         "assetSize = " ++ show size ++ ", " ++
         "assetSourcePath = " ++ show sourcePath ++ ", " ++
         "assetFilePath = " ++ show filePath ++ ", " ++
-        "assetLogicalPath = " ++ show logicalPath ++ ", " ++
         "assetModifiedTime = " ++ showTime modifiedTime ++ " }"
 
         where

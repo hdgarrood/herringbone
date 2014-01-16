@@ -12,19 +12,19 @@ findAsset :: Herringbone
           -> LogicalPath
           -> IO (Either AssetError Asset)
 findAsset hb path = do
-    assets <- locateAssets hb path
-    case assets of
-            []               -> return . Left $ AssetNotFound
-            [(srcPath, pps)] -> buildAsset' hb path srcPath pps
-            xs               -> return . Left $ AmbiguousSources (map fst xs)
+    specs <- locateAssets hb path
+    case specs of
+            []  -> return . Left $ AssetNotFound
+            [x] -> buildAsset' hb x
+            xs  -> return . Left $ AmbiguousSources (map getSource xs)
+    where
+    getSource (BuildSpec s _ _) = s
 
 buildAsset' :: Herringbone
-            -> LogicalPath
-            -> FilePath
-            -> [PP]
+            -> BuildSpec
             -> IO (Either AssetError Asset)
-buildAsset' hb path srcPath pps = do
-    result <- buildAsset hb path srcPath pps
+buildAsset' hb spec = do
+    result <- buildAsset hb spec
     return $ mapLeft AssetCompileError result
     where
     mapLeft :: (a -> b) -> Either a r -> Either b r

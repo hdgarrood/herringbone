@@ -22,12 +22,12 @@ setDestDir dir hb = Right $ hb { hbDestDir = dir }
 -- | Add the preprocessors in the list to the preprocessor collection.
 addPreprocessors :: [PP] -> ConfigBuilder
 addPreprocessors ppList hb = case insertAllPPs ppList (hbPPs hb) of
-    Just pps -> Right $ hb { hbPPs = insertAllPPs ppList (hbPPs hb) }
+    Just pps -> Right $ hb { hbPPs = pps }
     Nothing  -> Left "Couldn't add all preprocessors."
 
 -- | Displays detailed (debugging) log information during requests.
 setVerbose :: ConfigBuilder
-setVerbose conf = conf { hbVerbose = True }
+setVerbose conf = Right $ conf { hbVerbose = True }
 
 defaultHerringbone :: Herringbone
 defaultHerringbone = Herringbone
