@@ -39,7 +39,7 @@ test-suite herringbone-tests
                         http-types,
                         time,
                         old-locale,
-                        hspec,
+                        hspec >= 1.8,
                         HUnit,
                         warp
   default-extensions:   OverloadedStrings,
