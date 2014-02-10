@@ -3,12 +3,16 @@ Requirements:
 * completely specify which PPs to run from file name
 * Go in both directions (ie: given a logical path, work out what PPs + source
   file it is; given a source path, work out what PPs and logical path it has)
-* The source for a preprocessed asset should not be accessible
-* Should be sufficiently flexible to allow 'Mod.hs' <-> 'Mod.js'
+* If an asset's file name matches a PP, the source for a that asset should not
+  be accessible
+* Should be sufficiently flexible to allow Mod.hs <-> Mod.js
 * The files accessible from going forwards and backwards should be the same
+* Should be able to have more than one output file, eg
+  Mod.hs -> [Mod.js, Mod.js.sourcemap]
 
 Nice to haves:
-* Ability to run multiple preprocessors
+* Ability to run multiple preprocessors (although having to wire up a special
+  pp from two separate pps does the job)
 
 Possible implementation: pps have source ext and dest ext. Eg: 'hs' -> 'js'
 ---------------------------------------------------------------------------
