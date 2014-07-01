@@ -58,10 +58,14 @@ spec = do
             Left err <- findAsset testHB (lp "html")
             assertEqual' AssetNotFound err
 
-    context "when two assets map to the same logical path" $ do
+    context "with two assets mapping to the same logical path" $ do
         it "should return AmbiguousSources" $ do
             Left err <- findAsset testHB (lp "clash.css")
             case err of
                 AmbiguousSources _ -> return ()
                 x -> assertFailure $
                     "expected an AmbiguousSources error, got: " ++ show x
+
+    context "with assets in subdirectories" $ do
+        it "should compile them" $ do
+            testWithExpectedResult "sub/sub.txt"
