@@ -43,9 +43,6 @@ spec = do
         it "should run a single preprocessor" $ do
             testWithExpectedResult "add.js"
 
---         it "should run preprocessors in the correct order" $ do
---             testWithExpectedResult "threePreprocessors.js"
-
     context "when there's a compile error" $ do
         it "should report the error" $ do
             Left result <- findAsset testHB (lp "compileError.txt")
@@ -60,3 +57,11 @@ spec = do
         it "should return AssetNotFound" $ do
             Left err <- findAsset testHB (lp "html")
             assertEqual' AssetNotFound err
+
+    context "when two assets map to the same logical path" $ do
+        it "should return AmbiguousSources" $ do
+            Left err <- findAsset testHB (lp "clash.css")
+            case err of
+                AmbiguousSources _ -> return ()
+                x -> assertFailure $
+                    "expected an AmbiguousSources error, got: " ++ show x
