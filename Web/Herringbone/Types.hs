@@ -142,11 +142,15 @@ data BuildSpec = BuildSpec
                     (Maybe PP)  -- ^ Preprocessor to run (if any)
                     deriving (Show)
 
+-- | A BuildMapping contains the information to build all of the assets
+-- Herringbone is aware of. In development mode, this will have to be kept up to date.
+type BuildMapping = [BuildSpec]
+
 -- | The \'main\' datatype in this library. Contains all configuration.  All of
 -- the important functions will take a 'Herringbone' as their first argument.
 data Herringbone = Herringbone
-    { hbSourceDirs :: [FilePath]
-    -- ^ A list of source directories; this is where assets should be placed.
+    { hbSourceDir :: FilePath
+    -- ^ The directory to take asset sources from.
     , hbDestDir    :: FilePath
     -- ^ Where to copy assets to after they've been compiled.
     , hbPPs        :: PPs

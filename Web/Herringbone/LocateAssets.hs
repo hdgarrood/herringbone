@@ -61,15 +61,6 @@ makeDestAbsolute hb (BuildSpec sourcePath destPath pp) = do
     let fullDestPath = fullDestDir </> destPath
     return $ BuildSpec sourcePath fullDestPath pp
 
--- | Search through the Herringbone's source paths to find the absolute path of
--- the referenced source file.
-locateSource :: Herringbone
-             -> BuildSpec
-             -> IO (Maybe BuildSpec)
-locateSource hb (BuildSpec sourcePath destPath pp) = do
-    fullSourcePath <- searchForFile (hbSourceDirs hb) sourcePath
-    return $ fmap (\sp -> BuildSpec sp destPath pp) fullSourcePath
-
 swapExtensionBackwards :: PP -> FilePath -> Maybe FilePath
 swapExtensionBackwards pp =
     swapExtension

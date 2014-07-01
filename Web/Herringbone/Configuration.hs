@@ -11,8 +11,8 @@ herringbone builder = builder defaultHerringbone
 type ConfigBuilder = Herringbone -> Either String Herringbone
 
 -- | Adds a directory to the list of source directories.
-addSourceDir :: FilePath -> ConfigBuilder
-addSourceDir dir hb = Right $ hb { hbSourceDirs = dir : hbSourceDirs hb }
+setSourceDir :: FilePath -> ConfigBuilder
+setSourceDir dir hb = Right $ hb { hbSourceDir = dir }
 
 -- | Sets the destination directory. Note that this will overwrite the
 -- destination directory if one is already set.
@@ -31,7 +31,7 @@ setVerbose conf = Right $ conf { hbVerbose = True }
 
 defaultHerringbone :: Herringbone
 defaultHerringbone = Herringbone
-    { hbSourceDirs = []
+    { hbSourceDir  = "."
     , hbDestDir    = error "herringbone: destination dir must be specified"
     , hbPPs        = noPPs
     , hbVerbose    = False
