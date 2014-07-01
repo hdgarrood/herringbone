@@ -1,5 +1,5 @@
 name:                herringbone
-version:             0.0.8
+version:             0.0.9
 synopsis:            A library for compiling and serving static web assets.
 description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/herringbone>.
 license:             MIT
@@ -22,7 +22,7 @@ test-suite herringbone-tests
   main-is:              Spec.hs
   hs-source-dirs:       test .
   ghc-options:          -Wall
-  build-depends:        base >=4.5 && <4.7,
+  build-depends:        base >=4.5 && <5,
                         wai  >= 2.0 && <3,
                         wai-app-static,
                         text,
@@ -61,7 +61,7 @@ library
                         Web.Herringbone.BuildAsset
                         Web.Herringbone.FindAsset
                         Web.Herringbone.Adapter.Wai
-  build-depends:        base >=4.5 && <4.7,
+  build-depends:        base >=4.5 && <5,
                         wai  >= 2.0 && <3,
                         wai-app-static,
                         text,
