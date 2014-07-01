@@ -1,6 +1,24 @@
 -- | This module deals with locating assets on the disk, and calculating how to
 -- create assets which need preprocessing.
-module Web.Herringbone.LocateAssets where
+--
+-- In development mode:
+-- * At startup, build a mapping of source files to destination files together
+--   with any preprocessors that should be run on them (based on extension)
+-- * watch for filesystem changes, and rebuild relevant parts of this mapping
+--   when necessary
+-- * listen for HTTP requests and serve relevant files, performing
+--   preprocessing where necessary.
+--
+-- In production mode:
+-- * build the mapping
+-- * preprocess all the files and output them to a particular directory.
+--
+-- This architecture should ensure that the file mapping is identical in each
+-- mode.
+--
+module Web.Herringbone.LocateAssets (
+    createBuildMapping
+) where
 
 import Control.Monad
 import Data.Maybe
@@ -12,33 +30,32 @@ import Prelude hiding (FilePath)
 
 import Web.Herringbone.Types
 
--- | Calculates a list of BuildSpecs that could be used to build the asset with
--- the given logical path.
-locateAssets :: Herringbone -> LogicalPath -> IO [BuildSpec]
-locateAssets hb =
-    undefined
+createBuildMapping :: Herringbone -> IO BuildMapping
+createBuildMapping hb = do
+    files <- getFilesRecursive $ hbSourceDir hb
+    return $ map (getBuildSpecForwards hb) files
 
--- do
---     specs <- getBuildSpecsBackwards hb logPath
---     fullSpecs <- sequence $ map (locateFiles hb) specs
---     return $ catMaybes fullSpecs
+-- | Return the full paths of all files (excluding anything else) below the
+-- given root.
+getFilesRecursive :: FilePath -> IO [FilePath]
+getFilesRecursive root = do
+    results         <- F.listDirectory root
+    (files, others) <- partitionM F.isFile results
+    (dirs, _)       <- partitionM F.isDirectory others
+    subfiles        <- sequence $ map getFilesRecursive dirs
+    return $ files ++ concat subfiles
 
--- | Calculates a list of BuildSpecs that could be used to build the asset with
--- the given source path.
-locateAssetsReverse :: Herringbone -> FilePath -> IO (Maybe BuildSpec)
-locateAssetsReverse hb sourcePath =
-    return spec
-        >>= makeDestAbsolute hb
-        >>= locateSource hb
+-- should this go in a utils module?
+partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
+partitionM f list = foldM g ([], []) list
     where
-    spec = getBuildSpecForwards hb sourcePath
+    g (as, bs) x = do
+        flag <- f x
+        if flag
+            then return (x : as, bs)
+            else return (as, x : bs)
 
-getBuildSpecsBackwards :: Herringbone
-                       -> LogicalPath
-                       -> [BuildSpec]
-getBuildSpecsBackwards hb path = do
-    undefined
-
+-- | Given a FilePath of a source file, construct a BuildSpec for the file.
 getBuildSpecForwards :: Herringbone
                      -> FilePath
                      -> BuildSpec
