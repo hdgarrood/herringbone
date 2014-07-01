@@ -12,31 +12,6 @@ import Web.Herringbone.Preprocessor.StdIO
 import Web.Herringbone.Preprocessor.CoffeeScript
 import Web.Herringbone.Preprocessor.Sass
 
-mkMockPP :: Text -> Text -> PP
-mkMockPP fromExt toExt =
-    PP
-        { ppSpec = mkSpec fromExt toExt
-        , ppAction = \sourceData -> do
-            return . Right $
-                "Preprocessed as: " <> T.encodeUtf8 fromExt <> "\n" <>
-                sourceData
-        }
-    where
-    mkSpec from to = PPSpec
-        { ppName     = "MockPP: " <> from <> " -> " <> to
-        , ppConsumes = from
-        , ppProduces = to
-        }
-
-pp1 :: PP
-pp1 = mkMockPP "pp1" "txt"
-
-pp2 :: PP
-pp2 = mkMockPP "pp2" "txt"
-
-pp3 :: PP
-pp3 = mkMockPP "pp3" "txt"
-
 failingPP :: PP
 failingPP = PP { ppSpec = PPSpec "failing pp" "fails" "txt"
                , ppAction = const . return . Left $ "Oh snap!"
@@ -55,10 +30,7 @@ testHB :: Herringbone
 testHB = unsafeFromEither $ herringbone
     (   setSourceDir  "test/resources/assets"
     >=> setDestDir    "test/resources/compiled_assets"
-    >=> addPreprocessors [ pp1
-                         , pp2
-                         , pp3
-                         , failingPP
+    >=> addPreprocessors [ failingPP
                          , coffeeScript
                          , sass
                          , scss

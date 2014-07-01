@@ -41,14 +41,14 @@ spec = do
 
     context "with preprocessors" $ do
         it "should run a single preprocessor" $ do
-            testWithExpectedResult "onePreprocessor.js"
+            testWithExpectedResult "add.js"
 
-        it "should run preprocessors in the correct order" $ do
-            testWithExpectedResult "threePreprocessors.js"
+--         it "should run preprocessors in the correct order" $ do
+--             testWithExpectedResult "threePreprocessors.js"
 
     context "when there's a compile error" $ do
         it "should report the error" $ do
-            Left result <- findAsset testHB (lp "compileError.css")
+            Left result <- findAsset testHB (lp "compileError.txt")
             assertEqual' (AssetCompileError "Oh snap!") result
 
         it "should not create the output file" $ do

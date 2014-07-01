@@ -26,8 +26,9 @@ findAssetWithMapping hb path mapping =
             xs  -> return . Left $ AmbiguousSources (map getSource xs)
     where
     getSource (BuildSpec s _ _) = s
-    sourcePath = toFilePath path
-    specs = filter ((== sourcePath) . getSource) mapping
+    getDest (BuildSpec _ d _) = d
+    destPath = toFilePath path
+    specs = filter ((== destPath) . getDest) mapping
 
 buildAsset' :: Herringbone
             -> BuildSpec
