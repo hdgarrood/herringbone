@@ -137,7 +137,7 @@ fromList' = fromJust . fromList
 
 -- | A BuildSpec specifies how an asset should be built.
 data BuildSpec = BuildSpec
-                    FilePath    -- ^ Source path (relative)
+                    FilePath    -- ^ Source path
                     FilePath    -- ^ Destination path (again, relative)
                     (Maybe PP)  -- ^ Preprocessor to run (if any)
                     deriving (Show)

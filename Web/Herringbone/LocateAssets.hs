@@ -16,12 +16,10 @@
 -- This architecture should ensure that the file mapping is identical in each
 -- mode.
 --
-module Web.Herringbone.LocateAssets (
-    createBuildMapping
-) where
+module Web.Herringbone.LocateAssets where
 
 import Control.Monad
-import Data.Maybe
+import Data.Maybe (catMaybes, fromMaybe)
 import Data.Text (Text)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem.Path.CurrentOS as F
@@ -30,13 +28,13 @@ import Prelude hiding (FilePath)
 
 import Web.Herringbone.Types
 
-createBuildMapping :: Herringbone -> IO BuildMapping
-createBuildMapping hb = do
-    files <- getFilesRecursive $ hbSourceDir hb
-    return $ map (getBuildSpecForwards hb) files
+getBuildMapping :: Herringbone -> IO BuildMapping
+getBuildMapping hb = do
+    files <- getFilesRecursiveRelative $ hbSourceDir hb
+    return $ map (getBuildSpec hb) files
 
--- | Return the full paths of all files (excluding anything else) below the
--- given root.
+-- | Return the absolute paths of all files (excluding directories and other
+-- things) below the given root.
 getFilesRecursive :: FilePath -> IO [FilePath]
 getFilesRecursive root = do
     results         <- F.listDirectory root
@@ -44,6 +42,15 @@ getFilesRecursive root = do
     (dirs, _)       <- partitionM F.isDirectory others
     subfiles        <- sequence $ map getFilesRecursive dirs
     return $ files ++ concat subfiles
+
+-- | Return the relative paths of all files (excluding directories and other
+-- things) below the given root.
+getFilesRecursiveRelative :: FilePath -> IO [FilePath]
+getFilesRecursiveRelative root = do
+    root' <- F.canonicalizePath (root </> "") -- this is required, because. :/
+    files <- getFilesRecursive root'
+    let maybes = map (F.stripPrefix root') files
+    return $ catMaybes maybes
 
 -- should this go in a utils module?
 partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
@@ -56,16 +63,14 @@ partitionM f list = foldM g ([], []) list
             else return (as, x : bs)
 
 -- | Given a FilePath of a source file, construct a BuildSpec for the file.
-getBuildSpecForwards :: Herringbone
-                     -> FilePath
-                     -> BuildSpec
-getBuildSpecForwards hb sourcePath = BuildSpec sourcePath destPath pp
+getBuildSpec :: Herringbone -> FilePath -> BuildSpec
+getBuildSpec hb sourcePath = BuildSpec sourcePath destPath pp
     where
     (destPath, pp) =
         fromMaybe (sourcePath, Nothing) $ do
             extension <- F.extension sourcePath
-            pp' <- lookupConsumer (hbPPs hb) extension
-            destPath' <- swapExtensionForwards pp' sourcePath
+            pp'       <- lookupConsumer (hbPPs hb) extension
+            destPath' <- swapExtension pp' sourcePath
             return (destPath', Just pp')
 
 -- | Make the destination path of a BuildSpec absolute, using the destination
@@ -78,20 +83,14 @@ makeDestAbsolute hb (BuildSpec sourcePath destPath pp) = do
     let fullDestPath = fullDestDir </> destPath
     return $ BuildSpec sourcePath fullDestPath pp
 
-swapExtensionBackwards :: PP -> FilePath -> Maybe FilePath
-swapExtensionBackwards pp =
-    swapExtension
-        (ppProduces . ppSpec $ pp)
-        (ppConsumes . ppSpec $ pp)
-
-swapExtensionForwards :: PP -> FilePath -> Maybe FilePath
-swapExtensionForwards pp =
-    swapExtension
+swapExtension :: PP -> FilePath -> Maybe FilePath
+swapExtension pp =
+    swapExtension'
         (ppConsumes . ppSpec $ pp)
         (ppProduces . ppSpec $ pp)
 
-swapExtension :: Text -> Text -> FilePath -> Maybe FilePath
-swapExtension fromExt toExt path = do
+swapExtension' :: Text -> Text -> FilePath -> Maybe FilePath
+swapExtension' fromExt toExt path = do
     guard $ F.hasExtension path fromExt
     return $ F.replaceExtension path toExt
 

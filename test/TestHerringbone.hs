@@ -53,8 +53,7 @@ unsafeFromEither x = error $ "unsafeFromEither: " ++ show x
 
 testHB :: Herringbone
 testHB = unsafeFromEither $ herringbone
-    (   addSourceDir  "test/resources/assets"
-    >=> addSourceDir  "test/resources/assets2"
+    (   setSourceDir  "test/resources/assets"
     >=> setDestDir    "test/resources/compiled_assets"
     >=> addPreprocessors [ pp1
                          , pp2

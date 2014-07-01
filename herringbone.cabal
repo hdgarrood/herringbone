@@ -46,6 +46,7 @@ test-suite herringbone-tests
                         TypeSynonymInstances,
                         FlexibleInstances,
                         RankNTypes,
+                        ViewPatterns,
                         GeneralizedNewtypeDeriving
   default-language:     Haskell2010
 
@@ -82,5 +83,6 @@ library
                         TypeSynonymInstances,
                         FlexibleInstances,
                         RankNTypes,
+                        ViewPatterns,
                         GeneralizedNewtypeDeriving
   default-language:     Haskell2010

@@ -17,8 +17,10 @@ import Web.Herringbone.Types
 buildAsset :: Herringbone
            -> BuildSpec
            -> IO (Either CompileError Asset)
-buildAsset hb spec@(BuildSpec sourcePath destPath pp) = do
+buildAsset hb spec@(BuildSpec sourcePath' destPath' pp) = do
     verbosePut hb $ "building from: " ++ show spec
+    let sourcePath = hbSourceDir hb </> sourcePath'
+    let destPath = hbDestDir hb </> destPath'
 
     sourceModifiedTime <- F.getModified sourcePath
     compileNeeded <- shouldCompile sourceModifiedTime destPath

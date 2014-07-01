@@ -12,13 +12,22 @@ findAsset :: Herringbone
           -> LogicalPath
           -> IO (Either AssetError Asset)
 findAsset hb path = do
-    specs <- locateAssets hb path
+    mapping <- getBuildMapping hb
+    findAssetWithMapping hb path mapping
+
+findAssetWithMapping :: Herringbone
+                     -> LogicalPath
+                     -> BuildMapping
+                     -> IO (Either AssetError Asset)
+findAssetWithMapping hb path mapping =
     case specs of
             []  -> return . Left $ AssetNotFound
             [x] -> buildAsset' hb x
             xs  -> return . Left $ AmbiguousSources (map getSource xs)
     where
     getSource (BuildSpec s _ _) = s
+    sourcePath = toFilePath path
+    specs = filter ((== sourcePath) . getSource) mapping
 
 buildAsset' :: Herringbone
             -> BuildSpec
