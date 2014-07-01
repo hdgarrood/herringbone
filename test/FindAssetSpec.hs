@@ -55,3 +55,8 @@ spec = do
             _ <- findAsset testHB (lp "compileError.css")
             exists <- F.isFile (destDir </> "compileError.css")
             assert (not exists)
+
+    context "when requesting a directory (issue #4)" $ do
+        it "should return AssetNotFound" $ do
+            Left err <- findAsset testHB (lp "html")
+            assertEqual' AssetNotFound err
