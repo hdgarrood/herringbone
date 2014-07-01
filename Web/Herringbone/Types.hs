@@ -202,7 +202,7 @@ data Asset = Asset
 
 instance Show Asset where
     show (Asset size sourcePath filePath modifiedTime) =
-        "BundledAsset { " ++
+        "Asset { " ++
         "assetSize = " ++ show size ++ ", " ++
         "assetSourcePath = " ++ show sourcePath ++ ", " ++
         "assetFilePath = " ++ show filePath ++ ", " ++
