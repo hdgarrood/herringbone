@@ -41,7 +41,9 @@ test-suite herringbone-tests
                         old-locale,
                         hspec >= 1.8,
                         HUnit,
-                        warp
+                        warp,
+                        file-embed,
+                        template-haskell
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances,
@@ -78,7 +80,9 @@ library
                         unix-compat,
                         http-types,
                         time,
-                        old-locale
+                        old-locale,
+                        file-embed,
+                        template-haskell
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances,

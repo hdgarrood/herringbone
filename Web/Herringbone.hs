@@ -44,6 +44,7 @@ module Web.Herringbone (
     Asset(..),
     findAsset,
     precompile,
+    precompileEmbed,
     -- * Preprocessors
     PP(..),
     PPSpec(..),

@@ -66,3 +66,4 @@ runWithMsg :: Int -> String -> Application -> IO ()
 runWithMsg port appName app = do
     putStrLn $ "starting " ++ appName ++ " app on port " ++ show port ++ "..."
     run port app
+
