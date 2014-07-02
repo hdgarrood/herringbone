@@ -6,6 +6,7 @@ import Control.Monad.Reader
 import Data.Maybe
 import Data.Time
 import Filesystem.Path.CurrentOS (FilePath, (</>))
+import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
@@ -17,8 +18,12 @@ import Web.Herringbone.Types
 buildAsset :: Herringbone
            -> BuildSpec
            -> IO (Either CompileError Asset)
-buildAsset hb spec@(BuildSpec sourcePath' destPath' pp) = do
-    verbosePut hb $ "building from: " ++ show spec
+buildAsset hb (BuildSpec sourcePath' destPath' pp) = do
+    verbosePut hb $
+        "compiling asset " ++ show sourcePath' ++
+        "\n\tto: " ++ show destPath' ++
+        (maybe "" ("\n\twith preprocessor: " ++) (fmap show pp))
+
     let sourcePath = hbSourceDir hb </> sourcePath'
     let destPath = hbDestDir hb </> destPath'
 
@@ -27,13 +32,10 @@ buildAsset hb spec@(BuildSpec sourcePath' destPath' pp) = do
 
     result <- if compileNeeded
                 then do
-                    verbosePut hb $
-                        "compiling asset since source path is newer " ++
-                        "than destination file"
+                    verbosePut hb $ "compiling asset..."
                     compileAsset hb sourcePath destPath (maybeToList pp)
                 else do
-                    verbosePut hb $ "compile not needed; source path " ++
-                        "is older than destination path"
+                    verbosePut hb $ "asset compilation not needed"
                     return $ Right ()
 
     either (return . Left)
@@ -64,8 +66,12 @@ compileAsset :: Herringbone
              -> [PP]     -- ^ List of preprocessors to apply
              -> IO (Either CompileError ())
 compileAsset hb sourcePath destPath pps = do
-    sourceData <- F.readFile sourcePath
+    -- Ensure the destination directory exists
+    let destDir = F.directory destPath
+    verbosePut hb $ "creating dest dir: " ++ show destDir
+    F.createTree destDir
 
+    sourceData <- F.readFile sourcePath
     let computation = chainEither (map ppAction pps) sourceData
     let readerData = PPReader
             { ppReaderHb          = hb
