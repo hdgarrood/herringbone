@@ -146,19 +146,39 @@ data BuildSpec = BuildSpec
 -- Herringbone is aware of. In development mode, this will have to be kept up to date.
 type BuildMapping = [BuildSpec]
 
--- | The \'main\' datatype in this library. Contains all configuration.  All of
--- the important functions will take a 'Herringbone' as their first argument.
+-- | The \'main\' datatype in this library.  All of the important functions
+-- will take a 'Herringbone' as their first argument.
 data Herringbone = Herringbone
-    { hbSourceDir :: FilePath
+    { herringboneSettings :: HerringboneSettings
+    , herringboneStartTime :: UTCTime
+    }
+
+-- | Contains configuration.
+data HerringboneSettings = HerringboneSettings
+    { settingsSourceDir :: FilePath
     -- ^ The directory to take asset sources from.
-    , hbDestDir    :: FilePath
+    , settingsDestDir    :: FilePath
     -- ^ Where to copy assets to after they've been compiled.
-    , hbPPs        :: PPs
+    , settingsPPs        :: PPs
     -- ^ Preprocessors
-    , hbVerbose    :: Bool
+    , settingsVerbose    :: Bool
     -- ^ Dump debugging data to stdout on every request.
     }
     deriving (Show)
+
+type ConfigBuilder = HerringboneSettings -> Either String HerringboneSettings
+
+hbSourceDir :: Herringbone -> FilePath
+hbSourceDir = settingsSourceDir . herringboneSettings
+
+hbDestDir :: Herringbone -> FilePath
+hbDestDir = settingsDestDir . herringboneSettings
+
+hbPPs :: Herringbone -> PPs
+hbPPs = settingsPPs . herringboneSettings
+
+hbVerbose :: Herringbone -> Bool
+hbVerbose = settingsVerbose . herringboneSettings
 
 -- | Log a message to stdout if hbVerbose is enabled.
 verbosePut :: Herringbone -> String -> IO ()

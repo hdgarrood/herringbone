@@ -1,9 +1,5 @@
 module Web.Herringbone.FindAsset where
 
-import Control.Monad (when)
-import Prelude hiding (FilePath)
-import Filesystem.Path.CurrentOS (FilePath)
-
 import Web.Herringbone.LocateAssets
 import Web.Herringbone.BuildAsset
 import Web.Herringbone.Types

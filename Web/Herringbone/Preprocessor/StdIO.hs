@@ -4,7 +4,6 @@ module Web.Herringbone.Preprocessor.StdIO (
 
 import Control.Monad.IO.Class
 import Data.Monoid
-import Data.Text (Text)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8

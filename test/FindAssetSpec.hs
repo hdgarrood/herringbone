@@ -11,13 +11,14 @@ import SpecHelper
 
 spec :: Spec
 spec = do
-    let destDir = hbDestDir testHB
+    let destDir = settingsDestDir testHerringboneSettings
 
     context "without preprocessors" $ do
         let logPath = lp "buildNoPreprocessors.js"
 
         it "should copy a source file to the destination directory" $ do
-            asset' <- findAsset testHB logPath
+            hb <- testHB
+            asset' <- findAsset hb logPath
 
             assertIsRight asset'
             let Right asset = asset'
@@ -26,15 +27,17 @@ spec = do
                                     (assetFilePath asset)
 
         it "should get the modification time of the source file" $ do
-            Right asset <- findAsset testHB logPath
+            hb <- testHB
+            Right asset <- findAsset hb logPath
             sourceMTime <- F.getModified (assetSourcePath asset)
 
             assertEqual' sourceMTime (assetModifiedTime asset)
 
         it "should not compile unless necessary" $ do
-            Right asset  <- findAsset testHB logPath
+            hb <- testHB
+            Right asset  <- findAsset hb logPath
             mTime        <- F.getModified (assetFilePath asset)
-            Right asset' <- findAsset testHB logPath
+            Right asset' <- findAsset hb logPath
             mTime'       <- F.getModified (assetFilePath asset')
 
             assertEqual' mTime mTime'
@@ -45,22 +48,26 @@ spec = do
 
     context "when there's a compile error" $ do
         it "should report the error" $ do
-            Left result <- findAsset testHB (lp "compileError.txt")
+            hb <- testHB
+            Left result <- findAsset hb (lp "compileError.txt")
             assertEqual' (AssetCompileError "Oh snap!") result
 
         it "should not create the output file" $ do
-            _ <- findAsset testHB (lp "compileError.css")
+            hb <- testHB
+            _ <- findAsset hb (lp "compileError.css")
             exists <- F.isFile (destDir </> "compileError.css")
             assert (not exists)
 
     context "when requesting a directory (issue #4)" $ do
         it "should return AssetNotFound" $ do
-            Left err <- findAsset testHB (lp "html")
+            hb <- testHB
+            Left err <- findAsset hb (lp "html")
             assertEqual' AssetNotFound err
 
     context "with two assets mapping to the same logical path" $ do
         it "should return AmbiguousSources" $ do
-            Left err <- findAsset testHB (lp "clash.css")
+            hb <- testHB
+            Left err <- findAsset hb (lp "clash.css")
             case err of
                 AmbiguousSources _ -> return ()
                 x -> assertFailure $
@@ -69,3 +76,12 @@ spec = do
     context "with assets in subdirectories" $ do
         it "should compile them" $ do
             testWithExpectedResult "sub/sub.txt"
+
+    context "when replacing a preprocessor" $ do
+        it "should recompile the asset" $ do
+            testWithExpectedResult "add.js"
+
+            hb' <- initHerringbone $ unsafeFromEither $
+                    setPreprocessors [newCoffee] $ testHerringboneSettings
+            Right asset <- findAsset hb' (lp "add.js")
+            assertFileContentsIs "changed" (assetFilePath asset)

@@ -2,12 +2,12 @@ module AssertionsHelper where
 
 import Control.Applicative
 import Control.Monad
+import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Data.List (sort)
 import Test.HUnit hiding (path)
 import Prelude hiding (FilePath)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
-import Prelude hiding (FilePath)
 import qualified Filesystem as F
 
 import LazinessHelper
@@ -28,7 +28,8 @@ testWithExpectedResult :: Text -> Assertion
 testWithExpectedResult logicalPathText = do
     let logicalPath = lp logicalPathText
     let filePath = toFilePath logicalPath
-    result <- findAsset testHB logicalPath
+    hb <- testHB
+    result <- findAsset hb logicalPath
     either (fail . show)
            (assertResultMatches filePath . assetFilePath)
            result
@@ -50,6 +51,11 @@ assertFileContentsMatch pathA pathB = do
     assertBool ("expected file contents to match\n" ++
                 "this file:       " ++ es pathA ++ "\n" ++
                 "versus this one: " ++ es pathB ++ "\n") matches
+
+assertFileContentsIs :: ByteString -> FilePath -> Assertion
+assertFileContentsIs string path = do
+    fileContents <- F.readFile path
+    assertEqual' string fileContents
 
 assertEqual' :: (Eq a, Show a) => a -> a -> Assertion
 assertEqual' = assertEqual ""

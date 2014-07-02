@@ -22,7 +22,7 @@ import Web.Herringbone.Types
 
 -- | Convert a 'Herringbone' to a WAI 'Application'.
 toApplication :: Herringbone -> Application
-toApplication hb@(Herringbone { hbDestDir = dest }) =
+toApplication hb@(hbDestDir -> dest) =
     staticApp $ (defaultWebAppSettings dest) { ssLookupFile = lookupFile hb }
 
 lookupFile :: Herringbone -> Pieces -> IO LookupResult

@@ -28,7 +28,12 @@ Example:
 -}
 module Web.Herringbone (
     -- * Creating a Herringbone
-    Herringbone(..),
+    Herringbone,
+    hbSourceDir,
+    hbDestDir,
+    hbPPs,
+    hbVerbose,
+    HerringboneSettings(..),
     module Web.Herringbone.Configuration,
     -- * Assets
     LogicalPath,

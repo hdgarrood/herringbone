@@ -1,9 +1,6 @@
 module TestHerringbone where
 
 import Control.Monad
-import Data.Text (Text)
-import qualified Data.Text.Encoding as T
-import Data.Monoid
 import Network.Wai
 import Network.Wai.Handler.Warp
 
@@ -22,15 +19,20 @@ sed = makeStdIOPP spec "sed" ["-e", "s/e/u/"]
     where
     spec = PPSpec "sed" "sed" "txt"
 
+newCoffee :: PP
+newCoffee = PP { ppSpec = PPSpec "CoffeeScript, changed" "coffee" "js"
+               , ppAction = const . return . Right $ "changed"
+               }
+
 unsafeFromEither :: (Show a, Show b) => Either a b -> b
 unsafeFromEither (Right x) = x
 unsafeFromEither x = error $ "unsafeFromEither: " ++ show x
 
-testHB :: Herringbone
-testHB = unsafeFromEither $ herringbone
+testHerringboneSettings :: HerringboneSettings
+testHerringboneSettings = unsafeFromEither $ makeSettings
     (   setSourceDir  "test/resources/assets"
     >=> setDestDir    "test/resources/compiled_assets"
-    >=> addPreprocessors [ failingPP
+    >=> setPreprocessors [ failingPP
                          , coffeeScript
                          , sass
                          , scss
@@ -38,24 +40,27 @@ testHB = unsafeFromEither $ herringbone
                          ]
     )
 
+testHB :: IO Herringbone
+testHB = initHerringbone testHerringboneSettings
 
-testHBVerbose :: Herringbone
-testHBVerbose = unsafeFromEither $ setVerbose testHB
+testHBVerbose :: IO Herringbone
+testHBVerbose = initHerringbone . unsafeFromEither $
+    setVerbose testHerringboneSettings
 
 testServerPort :: Int
 testServerPort = 3002
 
 runTestHB :: IO ()
-runTestHB = runWithMsg
-    testServerPort
-    "normal"
-    (toApplication testHB)
+runTestHB = do
+    hb <- testHB
+    runWithMsg
+        testServerPort "normal" (toApplication hb)
 
 runTestHBVerbose :: IO ()
-runTestHBVerbose = runWithMsg
-    testServerPort
-    "verbose"
-    (toApplication testHBVerbose)
+runTestHBVerbose = do
+    hb <- testHBVerbose
+    runWithMsg
+        testServerPort "normal" (toApplication hb)
 
 runWithMsg :: Int -> String -> Application -> IO ()
 runWithMsg port appName app = do
