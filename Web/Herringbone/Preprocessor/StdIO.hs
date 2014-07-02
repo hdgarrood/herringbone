@@ -7,8 +7,8 @@ import Data.Monoid
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
-import System.Exit
-import System.Process.ByteString
+import System.Exit (ExitCode(..))
+import System.Process.ByteString (readProcessWithExitCode)
 import Web.Herringbone
 
 -- | Make a preprocessor which works over standard IO; reading input from
@@ -34,8 +34,8 @@ readAllFromProcess :: String        -- ^ Program
                    -> [String]      -- ^ Args
                    -> ByteString    -- ^ Stdin
                    -> IO (Either ByteString ByteString)
-readAllFromProcess program flags input = do
-    (code,out,err) <- readProcessWithExitCode program flags input
+readAllFromProcess program args input = do
+    (code,out,err) <- readProcessWithExitCode program args input
     return $ case code of
         ExitFailure 127 -> Left $ "cannot find executable " <> C8.pack program
         ExitFailure _   -> Left $ join (err, out)

@@ -46,6 +46,8 @@ spec = do
 
         context "with preprocessors" $ do
             it "should run a single preprocessor" $ do
+                requiresExecutable "coffee"
+
                 testWithExpectedResult "add.js"
 
         context "when there's a compile error" $ do
@@ -56,8 +58,8 @@ spec = do
 
             it "should not create the output file" $ do
                 hb <- testHB
-                _ <- findAsset hb (lp "compileError.css")
-                exists <- F.isFile (destDir </> "compileError.css")
+                _ <- findAsset hb (lp "compileError.txt")
+                exists <- F.isFile (destDir </> "compileError.txt")
                 assert (not exists)
 
         context "when requesting a directory (issue #4)" $ do
@@ -81,10 +83,13 @@ spec = do
 
         context "when replacing a preprocessor" $ do
             it "should recompile the asset" $ do
+                requiresExecutable "coffee"
+
                 testWithExpectedResult "add.js"
 
                 hb' <- initHerringbone $ unsafeFromEither $
-                        setPreprocessors [newCoffee] $ testHerringboneSettings
+                        setPreprocessors [newCoffee] $
+                        testHerringboneSettings
                 Right asset <- findAsset hb' (lp "add.js")
                 assertFileContentsIs "changed" (assetFilePath asset)
 
