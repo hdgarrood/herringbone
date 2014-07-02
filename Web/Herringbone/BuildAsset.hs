@@ -28,7 +28,7 @@ buildAsset hb (BuildSpec sourcePath' destPath' pp) = do
     let destPath = hbDestDir hb </> destPath'
 
     sourceModifiedTime <- F.getModified sourcePath
-    compileNeeded <- shouldCompile sourceModifiedTime destPath
+    compileNeeded <- shouldCompile hb sourceModifiedTime destPath
 
     result <- if compileNeeded
                 then do
@@ -49,14 +49,15 @@ buildAsset hb (BuildSpec sourcePath' destPath' pp) = do
 
 -- | Should we compile an asset? True if either the asset doesn't exist, or if
 -- its modified time is older than the supplied source modification time.
-shouldCompile :: UTCTime -> FilePath -> IO Bool
-shouldCompile sourceModifiedTime destPath = do
+shouldCompile :: Herringbone -> UTCTime -> FilePath -> IO Bool
+shouldCompile hb sourceModifiedTime destPath = do
     exists <- F.isFile destPath
     if not exists
         then return True
         else do
             destModifiedTime <- F.getModified destPath
-            return $ sourceModifiedTime > destModifiedTime
+            let changedTime = max sourceModifiedTime (herringboneStartTime hb)
+            return $ changedTime > destModifiedTime
 
 -- | Compile the given asset by invoking any preprocessors on the source path,
 -- and copying the result to the destination path.
