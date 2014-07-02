@@ -43,6 +43,7 @@ module Web.Herringbone (
     toFilePath,
     Asset(..),
     findAsset,
+    precompile,
     -- * Preprocessors
     PP(..),
     PPSpec(..),
@@ -58,4 +59,5 @@ module Web.Herringbone (
 import Web.Herringbone.Configuration
 import Web.Herringbone.Types
 import Web.Herringbone.FindAsset
+import Web.Herringbone.Precompile
 import Web.Herringbone.Adapter.Wai
