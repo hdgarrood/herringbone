@@ -1,19 +1,23 @@
 module Web.Herringbone.Configuration where
 
 import Data.Time.Clock (getCurrentTime)
-import Web.Herringbone.Types
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
+
+import Web.Herringbone.Types
 
 -- | For convenience.
 herringbone :: ConfigBuilder -> IO Herringbone
 herringbone = initHerringbone . makeSettings
 
--- | Creates a 'HerringboneSettings' instance.
+-- | Creates a 'HerringboneSettings' instance from a 'ConfigBuilder'.
+-- This just applies the config builder to the default settings:
+--
+-- > makeSettings builder = builder defaultSettings
 makeSettings :: ConfigBuilder -> HerringboneSettings
 makeSettings builder = builder defaultSettings
 
--- | Sets up internal state, and returns the Herringbone, ready to be used.
+-- | Sets up internal state, and returns a Herringbone, ready to be used.
 initHerringbone :: HerringboneSettings -> IO Herringbone
 initHerringbone settings = do
     time <- getCurrentTime
