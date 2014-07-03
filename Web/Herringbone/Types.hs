@@ -43,7 +43,7 @@ runPPM comp readerData = runReaderT (unPPM comp) readerData
 -- Preprocessors are run when a file matches its rule.  For example, if you
 -- have a preprocessor which takes \"coffee\" files and emits \"js\" files,
 -- there is a file named \"application.coffee\", and you request
--- \"application.js\", Herringbone will run the coffee preprocessor on that
+-- \"application.js\", Herringbone will run the coffee preprocessor on
 -- \"application.coffee\" and serve you the result.
 data PP = PP
     { ppName     :: Text
@@ -64,9 +64,10 @@ instance Show PP where
 
 -- | A function which performs the compilation.
 type PPAction =
-    B.ByteString -> -- ^ Input file contents
-    PPM (Either CompileError B.ByteString) -- ^ Output file contents, or a
-                                           -- compile error.
+    B.ByteString ->
+    -- ^ Input file contents
+    PPM (Either CompileError B.ByteString)
+    -- ^ Output file contents, or a compile error.
 
 -- | A string which should contain information about why an asset failed to
 -- compile.
