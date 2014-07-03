@@ -1,0 +1,44 @@
+name:                herringbone-fay
+version:             0.0.1
+-- synopsis:
+-- description:
+license:             MIT
+license-file:        LICENSE
+author:              Harry Garrood
+maintainer:          harry@garrood.me
+-- copyright:
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+executable herringbone-fay-test-server
+  main-is:             Main.hs
+  hs-source-dirs:      test
+  build-depends:       base,
+                       fay,
+                       herringbone,
+                       herringbone-fay,
+                       data-default,
+                       wai,
+                       warp
+  default-extensions:  OverloadedStrings
+  default-language:    Haskell2010
+
+library
+  exposed-modules:     Web.Herringbone.Preprocessor.Fay
+  build-depends:       base >=4.6 && <4.7,
+                       herringbone >= 0.0.5,
+                       fay,
+                       -- hack: compiling Fay requires fay-base, but we can't
+                       -- depend on it explicitly (because of the
+                       -- Prelude module name clash).
+                       fay-text,
+                       filepath,
+                       temporary,
+                       bytestring,
+                       transformers,
+                       mtl,
+                       system-filepath
+  default-extensions:  OverloadedStrings
+  default-language:    Haskell2010
