@@ -1,5 +1,5 @@
--- | This module deals with locating assets on the disk, and calculating how to
--- create assets which need preprocessing.
+-- | This module deals with locating assets on the disk, and determining which
+-- assets needs preprocessing.
 --
 -- In development mode:
 -- * At startup, build a mapping of source files to destination files together
@@ -8,6 +8,8 @@
 --   when necessary
 -- * listen for HTTP requests and serve relevant files, performing
 --   preprocessing where necessary.
+-- (well, eventually do all that. For now just rebuild the BuildMapping for
+-- each request).
 --
 -- In production mode:
 -- * build the mapping
@@ -16,7 +18,7 @@
 -- This architecture should ensure that the file mapping is identical in each
 -- mode.
 --
-module Web.Herringbone.LocateAssets where
+module Web.Herringbone.GetBuildMapping where
 
 import Control.Monad
 import Data.Maybe (catMaybes, fromMaybe)

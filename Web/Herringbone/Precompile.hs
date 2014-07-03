@@ -9,7 +9,7 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Data.Text as T
 import Control.Monad (forM, (>=>))
 
-import Web.Herringbone.LocateAssets
+import Web.Herringbone.GetBuildMapping
 import Web.Herringbone.FindAsset
 import Web.Herringbone.Types
 

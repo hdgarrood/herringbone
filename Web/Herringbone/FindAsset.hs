@@ -1,6 +1,6 @@
 module Web.Herringbone.FindAsset where
 
-import Web.Herringbone.LocateAssets
+import Web.Herringbone.GetBuildMapping
 import Web.Herringbone.BuildAsset
 import Web.Herringbone.Types
 

@@ -7,7 +7,6 @@ import Test.Hspec
 import Test.HUnit hiding (path)
 
 import Web.Herringbone
-import Web.Herringbone.LocateAssets (getFilesRecursiveRelative)
 import SpecHelper
 import TestPrecompiledAssets (precompiledEmbedded)
 

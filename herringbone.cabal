@@ -60,7 +60,7 @@ library
                         Web.Herringbone.Preprocessor.CoffeeScript
   other-modules:        Web.Herringbone.Types
                         Web.Herringbone.Configuration
-                        Web.Herringbone.LocateAssets
+                        Web.Herringbone.GetBuildMapping
                         Web.Herringbone.BuildAsset
                         Web.Herringbone.FindAsset
                         Web.Herringbone.Adapter.Wai
