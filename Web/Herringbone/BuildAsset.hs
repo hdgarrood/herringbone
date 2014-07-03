@@ -16,9 +16,18 @@ import Web.Herringbone.Types
 -- checks whether the compilation is necessary based on the modified times of
 -- the source and destination files.
 buildAsset :: Herringbone
+            -> BuildSpec
+            -> IO (Either AssetError Asset)
+buildAsset hb spec = fmap (mapLeft AssetCompileError) (buildAsset' hb spec)
+    where
+    mapLeft :: (a -> b) -> Either a r -> Either b r
+    mapLeft f (Left x)  = Left $ f x
+    mapLeft _ (Right x) = Right x
+
+buildAsset' :: Herringbone
            -> BuildSpec
            -> IO (Either CompileError Asset)
-buildAsset hb (BuildSpec sourcePath' destPath' pp) = do
+buildAsset' hb (BuildSpec sourcePath' destPath' pp) = do
     verbosePut hb $
         "compiling asset " ++ show sourcePath' ++
         "\n\tto: " ++ show destPath' ++
