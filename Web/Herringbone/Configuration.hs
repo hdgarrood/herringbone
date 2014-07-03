@@ -21,7 +21,7 @@ makeSettings builder = builder defaultSettings
 initHerringbone :: HerringboneSettings -> IO Herringbone
 initHerringbone settings = do
     time <- getCurrentTime
-    return $ Herringbone
+    return Herringbone
         { herringboneStartTime = time
         , herringboneSettings = settings
         }

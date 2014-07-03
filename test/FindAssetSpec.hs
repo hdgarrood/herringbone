@@ -97,10 +97,7 @@ spec = do
                 errs    <- precompile hb
                 dests   <- getFilesRecursiveRelative (hbDestDir hb)
 
-                let countErrs    = length errs
-                let countSources = length sources
-                let countDests   = length dests
-                assertEqual' (countSources - countErrs) countDests
+                assertGotAllAssets errs sources dests
 
         context "when embedding assets" $ do
             it "should get them all" $ do
@@ -109,7 +106,4 @@ spec = do
                 hb <- testHB
                 sources <- getFilesRecursiveRelative (hbSourceDir hb)
 
-                let countErrs    = length errs
-                let countSources = length sources
-                let countDests   = length dests
-                assertEqual' (countSources - countErrs) countDests
+                assertGotAllAssets errs sources dests

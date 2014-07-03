@@ -1,13 +1,10 @@
 module SpecHelper (
-    module AssertionsHelper,
-    module LazinessHelper,
-    module EmbeddedAssetsHelper,
-    module HerringboneHelper,
+    module X,
     getFilesRecursiveRelative
 ) where
 
-import AssertionsHelper
-import LazinessHelper
 import Web.Herringbone.GetBuildMapping (getFilesRecursiveRelative)
-import EmbeddedAssetsHelper
-import HerringboneHelper
+import AssertionsHelper as X
+import LazinessHelper as X
+import EmbeddedAssetsHelper as X
+import HerringboneHelper as X

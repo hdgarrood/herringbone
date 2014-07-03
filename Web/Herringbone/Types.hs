@@ -37,7 +37,7 @@ newtype PPM a = PPM { unPPM :: ReaderT PPReader IO a }
     deriving (Functor, Applicative, Monad, MonadIO, (MonadReader PPReader))
 
 runPPM :: PPM a -> PPReader -> IO a
-runPPM comp readerData = runReaderT (unPPM comp) readerData
+runPPM comp = runReaderT (unPPM comp)
 
 -- | A preprocessor something which is run on the asset before it is served.
 -- Preprocessors are run when a file matches its rule.  For example, if you

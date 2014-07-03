@@ -31,7 +31,7 @@ compile :: String
         -> [String]
         -> ByteString
         -> PPM (Either CompileError ByteString)
-compile progname args source = do
+compile progname args source =
     liftIO $ readAllFromProcess progname args source
 
 -- | Read from a process returning both std err and out.

@@ -67,3 +67,12 @@ assertIsRight :: Show a => Either a b -> Assertion
 assertIsRight (Right _) = return ()
 assertIsRight (Left x)  = assertFailure $
                             "Expected a Right value; got: Left " ++ show x
+
+
+assertGotAllAssets :: [a] -> [b] -> [c] -> Assertion
+assertGotAllAssets errs sources dests =
+    assertEqual' (countSources - countErrs) countDests
+    where
+    countErrs    = length errs
+    countSources = length sources
+    countDests   = length dests

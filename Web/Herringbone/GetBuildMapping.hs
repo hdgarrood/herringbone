@@ -21,6 +21,7 @@
 module Web.Herringbone.GetBuildMapping where
 
 import Control.Monad
+import Control.Applicative ((<$>))
 import Data.Maybe (catMaybes, fromMaybe)
 import Data.Text (Text)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
@@ -42,7 +43,7 @@ getFilesRecursive root = do
     results         <- F.listDirectory root
     (files, others) <- partitionM F.isFile results
     (dirs, _)       <- partitionM F.isDirectory others
-    subfiles        <- sequence $ map getFilesRecursive dirs
+    subfiles        <- mapM getFilesRecursive dirs
     return $ files ++ concat subfiles
 
 -- | Return the relative paths of all files (excluding directories and other
@@ -56,13 +57,13 @@ getFilesRecursiveRelative root = do
 
 -- should this go in a utils module?
 partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
-partitionM f list = foldM g ([], []) list
+partitionM f = foldM g ([], [])
     where
     g (as, bs) x = do
         flag <- f x
-        if flag
-            then return (x : as, bs)
-            else return (as, x : bs)
+        return $ if flag
+            then (x : as, bs)
+            else (as, x : bs)
 
 -- | Given a FilePath of a source file, construct a BuildSpec for the file.
 getBuildSpec :: Herringbone -> FilePath -> BuildSpec
@@ -102,8 +103,8 @@ searchForFile :: [FilePath]     -- ^ List of search paths
               -> FilePath       -- ^ File to search for
               -> IO (Maybe FilePath)
 searchForFile searchPath path = do
-    let fullPaths = map (\x -> x </> path) searchPath
+    let fullPaths = map (</> path) searchPath
     matches <- filterM F.isFile fullPaths
     case matches of
         []    -> return Nothing
-        (x:_) -> fmap Just $ F.canonicalizePath x
+        (x:_) -> Just <$> F.canonicalizePath x

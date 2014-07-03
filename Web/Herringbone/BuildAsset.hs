@@ -29,9 +29,9 @@ buildAsset' :: Herringbone
            -> IO (Either CompileError Asset)
 buildAsset' hb (BuildSpec sourcePath' destPath' pp) = do
     verbosePut hb $
-        "compiling asset " ++ show sourcePath' ++
+        "asset requested: " ++ show sourcePath' ++
         "\n\tto: " ++ show destPath' ++
-        (maybe "" ("\n\twith preprocessor: " ++) (fmap show pp))
+        maybe "" ("\n\twith preprocessor: " ++) (fmap show pp)
 
     let sourcePath = hbSourceDir hb </> sourcePath'
     let destPath = hbDestDir hb </> destPath'
@@ -41,10 +41,10 @@ buildAsset' hb (BuildSpec sourcePath' destPath' pp) = do
 
     result <- if compileNeeded
                 then do
-                    verbosePut hb $ "compiling asset..."
+                    verbosePut hb "compiling asset..."
                     compileAsset hb sourcePath destPath (maybeToList pp)
                 else do
-                    verbosePut hb $ "asset compilation not needed"
+                    verbosePut hb "asset compilation not needed"
                     return $ Right ()
 
     either (return . Left)
@@ -98,5 +98,5 @@ compileAsset hb sourcePath destPath pps = do
 chainEither :: Monad m => [a -> m (Either b a)] -> a -> m (Either b a)
 chainEither fs m = foldl go z fs
     where
-        go = \acc f -> acc >>= either (return . Left) f
+        go acc f = acc >>= either (return . Left) f
         z  = return (Right m)

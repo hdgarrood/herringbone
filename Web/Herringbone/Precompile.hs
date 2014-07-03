@@ -71,7 +71,7 @@ embedAssets iohb = do
     compileErrToExp err = LitE (StringL (B8.unpack err))
     sourcesToExp srcs = ListE $ map filePathToExp srcs
     -- Just use a literal because we have an IsString instance
-    filePathToExp path = (LitE (StringL (F.encodeString path)))
+    filePathToExp path = LitE (StringL (F.encodeString path))
 
     transformFiles (ListE tups) = 
         let f (TupE [LitE (StringL path), contents]) =
