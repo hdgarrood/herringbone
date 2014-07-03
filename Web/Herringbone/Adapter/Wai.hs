@@ -1,6 +1,7 @@
 module Web.Herringbone.Adapter.Wai where
 
 import Control.Monad
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -19,6 +20,16 @@ import qualified Filesystem as F
 
 import Web.Herringbone.FindAsset
 import Web.Herringbone.Types
+
+class ToLazyByteString a where
+    toLazyByteString :: a -> BL.ByteString
+
+instance ToLazyByteString FilePath where
+    toLazyByteString = toLazyByteString . F.encode
+
+instance ToLazyByteString B.ByteString where
+    toLazyByteString = BL.fromChunks . (: [])
+
 
 -- | Convert a 'Herringbone' to a WAI 'Application'.
 toApplication :: Herringbone -> Application

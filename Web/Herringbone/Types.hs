@@ -2,7 +2,6 @@ module Web.Herringbone.Types where
 
 import Control.Monad.Reader
 import Control.Applicative
-import Data.Char
 import Data.Maybe
 import Data.Map (Map)
 import qualified Data.Map as M
@@ -13,22 +12,9 @@ import Data.Time.Format
 import System.Locale
 import System.IO hiding (FilePath)
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
-
-class ToLazyByteString a where
-    toLazyByteString :: a -> BL.ByteString
-
-instance ToLazyByteString String where
-    toLazyByteString = BL.pack . map (fromIntegral . ord)
-
-instance ToLazyByteString FilePath where
-    toLazyByteString = toLazyByteString . F.encode
-
-instance ToLazyByteString B.ByteString where
-    toLazyByteString = BL.fromChunks . (: [])
 
 data AssetError = AssetNotFound
                 | AssetCompileError CompileError
