@@ -43,10 +43,8 @@ precompile hb = do
 -- > type Files = [(LogicalPath, ByteString)] 
 --
 -- The second component is a mapping of filenames to file contents.
-precompileEmbed :: IO Herringbone -> Q Exp
-precompileEmbed iohb = do
-    type_ <- [t| ([(LogicalPath, AssetError)], [(LogicalPath, ByteString)]) |]
-
+embedAssets :: IO Herringbone -> Q Exp
+embedAssets iohb = do
     hb <- runIO iohb
     errs <- runIO (precompile hb)
     let errsExp = ListE $ map (\(path, err) ->
@@ -55,6 +53,7 @@ precompileEmbed iohb = do
     let filesExp = transformFiles filesExp'
     let expr = TupE [errsExp, filesExp]
 
+    type_ <- [t| ([(LogicalPath, AssetError)], [(LogicalPath, ByteString)]) |]
     return $ SigE expr type_
     where
     logicalPathToExp logicalPath =

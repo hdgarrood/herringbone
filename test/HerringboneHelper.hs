@@ -1,4 +1,4 @@
-module TestHerringbone where
+module HerringboneHelper where
 
 import Network.Wai
 import Network.Wai.Handler.Warp

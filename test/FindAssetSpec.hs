@@ -8,7 +8,6 @@ import Test.HUnit hiding (path)
 
 import Web.Herringbone
 import SpecHelper
-import TestPrecompiledAssets (precompiledEmbedded)
 
 spec :: Spec
 spec = do
@@ -105,7 +104,7 @@ spec = do
 
         context "when embedding assets" $ do
             it "should get them all" $ do
-                let (dests, errs) = precompiledEmbedded
+                let (dests, errs) = embeddedAssets
 
                 hb <- testHB
                 sources <- getFilesRecursiveRelative (hbSourceDir hb)

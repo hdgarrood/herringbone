@@ -11,7 +11,7 @@ import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem as F
 
 import LazinessHelper
-import TestHerringbone
+import HerringboneHelper
 import Web.Herringbone
 
 testWithInputs :: String -> (a -> Assertion) -> [a] -> Test
