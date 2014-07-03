@@ -1,4 +1,4 @@
-module FindAssetSpec where
+module HerringboneSpec where
 
 import Filesystem.Path.CurrentOS ((</>))
 import Prelude hiding (FilePath)
@@ -107,3 +107,15 @@ spec = do
                 sources <- getFilesRecursiveRelative (hbSourceDir hb)
 
                 assertGotAllAssets errs sources dests
+
+        context "with StdIO preprocessors" $ do
+            it "should use stdIO" $ do
+                testWithExpectedResult "hello.txt"
+
+            it "should use scss" $ do
+                requiresExecutable "scss"
+                testWithExpectedResult "blue.css"
+
+            it "should use sass" $ do
+                requiresExecutable "sass"
+                testWithExpectedResult "red.css"
