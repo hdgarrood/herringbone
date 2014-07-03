@@ -1,5 +1,4 @@
-dist/*
+*/dist/*
 .cabal-sandbox
 cabal.sandbox.config
-test/resources/.herringbone
 test/resources/compiled_assets
