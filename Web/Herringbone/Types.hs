@@ -4,11 +4,14 @@ import Control.Monad.Reader
 import Control.Applicative
 import Data.Char
 import Data.Maybe
+import Data.Map (Map)
+import qualified Data.Map as M
+import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Time.Clock
 import Data.Time.Format
 import System.Locale
 import System.IO hiding (FilePath)
-import Data.Text (Text)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Filesystem.Path.CurrentOS as F
@@ -35,7 +38,7 @@ data AssetError = AssetNotFound
 -- | Data which is given to preprocessors on the off-chance that they need it
 -- (eg, Fay)
 data PPReader = PPReader
-    { ppReaderHb          :: Herringbone 
+    { ppReaderHb          :: Herringbone
     -- ^ The Herringbone which was used to build the asset
     , ppReaderSourcePath  :: FilePath
     -- ^ The file path to the source file
@@ -57,93 +60,63 @@ runPPM comp readerData = runReaderT (unPPM comp) readerData
 -- \"application.js\", Herringbone will run the coffee preprocessor on that
 -- \"application.coffee\" and serve you the result.
 data PP = PP
-    { ppSpec   :: PPSpec
-    , ppAction :: PPAction
-    }
-
-instance Show PP where
-    show (PP spec _) = "PP { ppSpec = " ++ show spec ++ ", ppAction = <???> }"
-
--- | A function which performs the compilation.
-type PPAction = B.ByteString -> PPM (Either CompileError B.ByteString)
-
--- | A string which should contain information about why an asset failed to
--- compile.
-type CompileError = B.ByteString
-
--- | Information describing a preprocessor.
-data PPSpec = PPSpec
     { ppName     :: Text
     -- ^ Identifies a preprocessor. Mainly useful for debugging compile errors.
     , ppConsumes :: Text
     -- ^ Extension for files this preprocessor consumes.
     , ppProduces :: Text
     -- ^ Extension for files this preprocessor produces.
-    } deriving (Show, Eq, Ord)
+    , ppAction :: PPAction
+    -- ^ Performs the compilation.
+    }
+
+instance Show PP where
+    show (PP name consumes produces _) = concat
+        [ "<PP ", T.unpack name,
+            " (", T.unpack consumes, " -> ", T.unpack produces, ")>"
+        ]
+
+-- | A function which performs the compilation.
+type PPAction =
+    B.ByteString -> -- ^ Input file contents
+    PPM (Either CompileError B.ByteString) -- ^ Output file contents, or a
+                                           -- compile error.
+
+-- | A string which should contain information about why an asset failed to
+-- compile.
+type CompileError = B.ByteString
 
 -- | A collection of preprocessors. This can store many preprocessors which
 -- produce files with the same extension, but may not store more than one
 -- preprocessor which consumes files of a particular extension.
-newtype PPs = PPs { unPPs :: [PP] }
+newtype PPs = PPs { unPPs :: Map Text PP }
     deriving (Show)
 
-noPPs :: PPs
-noPPs = PPs []
+emptyPPs :: PPs
+emptyPPs = PPs M.empty
 
 -- | Given a file extension, find the preprocessor (if any) which consumes it.
-lookupConsumer :: PPs -> Text -> Maybe PP
-lookupConsumer pps ext = case filter (consumes ext) (unPPs pps) of
-    []  -> Nothing
-    [x] -> Just x
-    xs  -> error $
-        "herringbone: lookupConsumer got " ++ show xs ++ ". This is a bug. :(\
-        \ Please report it: <https://github.com/hdgarrood/herringbone>"
-    where
-    consumes e = (==) e . ppConsumes . ppSpec
+lookupPP :: Text -> PPs -> Maybe PP
+lookupPP ext pps = M.lookup ext (unPPs pps)
 
--- | Given a file extension, find the preprocessors which can produce it.
-lookupProducers :: PPs -> Text -> [PP]
-lookupProducers pps ext = filter (produces ext) $ unPPs pps
-    where
-    produces e = (==) e . ppProduces . ppSpec
-
--- | Inserts a preprocessor into a PPs safely.
-insertPP :: PP -> PPs -> Maybe PPs
-insertPP pp pps = do
-    let newExt = ppConsumes $ ppSpec pp
-    guard (not . hasConsumerOf newExt $ pps)
-    return $ unsafeInsertPP pp pps
-    where
-    hasConsumerOf e = isJust . flip lookupConsumer e
-
--- | Inserts a preprocessor into a PPs unsafely.
-unsafeInsertPP :: PP -> PPs -> PPs
-unsafeInsertPP pp (PPs pps) = PPs (pps ++ [pp])
+-- | Inserts a preprocessor into a PPs. If a preprocessor already exists with
+-- the given extension, it is discarded.
+insertPP :: PP -> PPs -> PPs
+insertPP pp pps = PPs $ M.insert (ppConsumes pp) pp (unPPs pps)
 
 -- | Turn a list of PPs into a proper 'PPs'.
-fromList :: [PP] -> Maybe PPs
-fromList ppList = insertAllPPs ppList noPPs
-
-insertAllPPs :: [PP] -> PPs -> Maybe PPs
-insertAllPPs ppList pps = allInserts pps
-    where
-    inserts    = map insertPP ppList
-    allInserts = foldl (>=>) (Just) inserts
-
--- | Turn a list of PPs into a proper 'PPs', raising an error if they cannot be
--- converted.
-fromList' :: [PP] -> PPs
-fromList' = fromJust . fromList
+fromList :: [PP] -> PPs
+fromList = foldr insertPP emptyPPs
 
 -- | A BuildSpec specifies how an asset should be built.
 data BuildSpec = BuildSpec
-                    FilePath    -- ^ Source path
-                    FilePath    -- ^ Destination path (again, relative)
-                    (Maybe PP)  -- ^ Preprocessor to run (if any)
-                    deriving (Show)
+    FilePath    -- ^ Source path (relative)
+    FilePath    -- ^ Destination path (again, relative)
+    (Maybe PP)  -- ^ Preprocessor to run (if any)
+    deriving (Show)
 
 -- | A BuildMapping contains the information to build all of the assets
--- Herringbone is aware of. In development mode, this will have to be kept up to date.
+-- Herringbone is aware of.
 type BuildMapping = [BuildSpec]
 
 -- | The \'main\' datatype in this library.  All of the important functions
@@ -166,7 +139,7 @@ data HerringboneSettings = HerringboneSettings
     }
     deriving (Show)
 
-type ConfigBuilder = HerringboneSettings -> Either String HerringboneSettings
+type ConfigBuilder = HerringboneSettings -> HerringboneSettings
 
 hbSourceDir :: Herringbone -> FilePath
 hbSourceDir = settingsSourceDir . herringboneSettings

@@ -6,11 +6,11 @@ import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 
 -- | For convenience.
-herringbone :: ConfigBuilder -> Either String (IO Herringbone)
-herringbone builder = fmap initHerringbone $ makeSettings builder
+herringbone :: ConfigBuilder -> IO Herringbone
+herringbone = initHerringbone . makeSettings
 
 -- | Creates a 'HerringboneSettings' instance.
-makeSettings :: ConfigBuilder -> Either String HerringboneSettings
+makeSettings :: ConfigBuilder -> HerringboneSettings
 makeSettings builder = builder defaultSettings
 
 -- | Sets up internal state, and returns the Herringbone, ready to be used.
@@ -24,27 +24,34 @@ initHerringbone settings = do
 
 -- | Adds a directory to the list of source directories.
 setSourceDir :: FilePath -> ConfigBuilder
-setSourceDir dir hb = Right $ hb { settingsSourceDir = dir }
+setSourceDir dir settings =
+    settings { settingsSourceDir = dir }
 
 -- | Sets the destination directory. Note that this will overwrite the
 -- destination directory if one is already set.
 setDestDir :: FilePath -> ConfigBuilder
-setDestDir dir hb = Right $ hb { settingsDestDir = dir }
+setDestDir dir settings =
+    settings { settingsDestDir = dir }
 
 -- | Set the preprocessor collection to the given list of preprocessors
 setPreprocessors :: [PP] -> ConfigBuilder
-setPreprocessors ppList hb = case insertAllPPs ppList noPPs of
-    Just pps -> Right $ hb { settingsPPs = pps }
-    Nothing  -> Left "Couldn't add all preprocessors."
+setPreprocessors ppList settings =
+    settings { settingsPPs = fromList ppList }
+
+-- | Add a preprocessor to the 'HerringboneSettings'
+addPreprocessor :: PP -> ConfigBuilder
+addPreprocessor pp settings =
+    settings { settingsPPs = insertPP pp (settingsPPs settings) }
 
 -- | Displays detailed log information during requests. Useful for debugging.
 setVerbose :: ConfigBuilder
-setVerbose conf = Right $ conf { settingsVerbose = True }
+setVerbose settings =
+    settings { settingsVerbose = True }
 
 defaultSettings :: HerringboneSettings
 defaultSettings = HerringboneSettings
     { settingsSourceDir  = "."
-    , settingsDestDir    = "_compiled_assets"
-    , settingsPPs        = noPPs
+    , settingsDestDir    = "compiled_assets"
+    , settingsPPs        = emptyPPs
     , settingsVerbose    = False
     }

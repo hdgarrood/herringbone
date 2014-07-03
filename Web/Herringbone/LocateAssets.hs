@@ -69,7 +69,7 @@ getBuildSpec hb sourcePath = BuildSpec sourcePath destPath pp
     (destPath, pp) =
         fromMaybe (sourcePath, Nothing) $ do
             extension <- F.extension sourcePath
-            pp'       <- lookupConsumer (hbPPs hb) extension
+            pp'       <- lookupPP extension (hbPPs hb)
             destPath' <- swapExtension pp' sourcePath
             return (destPath', Just pp')
 
@@ -85,9 +85,7 @@ makeDestAbsolute hb (BuildSpec sourcePath destPath pp) = do
 
 swapExtension :: PP -> FilePath -> Maybe FilePath
 swapExtension pp =
-    swapExtension'
-        (ppConsumes . ppSpec $ pp)
-        (ppProduces . ppSpec $ pp)
+    swapExtension' (ppConsumes pp) (ppProduces pp)
 
 swapExtension' :: Text -> Text -> FilePath -> Maybe FilePath
 swapExtension' fromExt toExt path = do

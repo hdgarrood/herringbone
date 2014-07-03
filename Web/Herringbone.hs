@@ -47,7 +47,6 @@ module Web.Herringbone (
     precompileEmbed,
     -- * Preprocessors
     PP(..),
-    PPSpec(..),
     PPs,
     AssetError(..),
     CompileError,

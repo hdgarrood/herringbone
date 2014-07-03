@@ -4,6 +4,7 @@ module Web.Herringbone.Preprocessor.StdIO (
 
 import Control.Monad.IO.Class
 import Data.Monoid
+import Data.Text (Text)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
@@ -13,13 +14,17 @@ import Web.Herringbone
 
 -- | Make a preprocessor which works over standard IO; reading input from
 -- stdin, and writing output to stdout.
-makeStdIOPP :: PPSpec 
+makeStdIOPP :: Text     -- ^ Name (identifies the preprocessor)
+            -> Text     -- ^ Source filename extension (eg "sass")
+            -> Text     -- ^ Destination filename extension (eg "css")
             -> String   -- ^ Program name
             -> [String] -- ^ Arguments
             -> PP
-makeStdIOPP spec progname args = PP
-    { ppSpec   = spec
-    , ppAction = compile progname args
+makeStdIOPP name consumes produces progname args = PP
+    { ppName     = name
+    , ppConsumes = consumes
+    , ppProduces = produces
+    , ppAction   = compile progname args
     }
     
 compile :: String

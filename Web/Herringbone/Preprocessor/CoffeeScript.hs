@@ -6,10 +6,5 @@ import Web.Herringbone
 import Web.Herringbone.Preprocessor.StdIO
 
 coffeeScript :: PP
-coffeeScript = makeStdIOPP spec "coffee" ["--stdio", "--print"]
-    where
-    spec = PPSpec
-        { ppName     = "CoffeeScript"
-        , ppConsumes = "coffee"
-        , ppProduces = "js"
-        }
+coffeeScript =
+    makeStdIOPP "CoffeeScript" "coffee" "js" "coffee" ["--stdio", "--print"]

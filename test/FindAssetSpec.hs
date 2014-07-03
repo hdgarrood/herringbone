@@ -87,8 +87,7 @@ spec = do
 
                 testWithExpectedResult "add.js"
 
-                hb' <- initHerringbone $ unsafeFromEither $
-                        setPreprocessors [newCoffee] $
+                hb' <- initHerringbone . setPreprocessors [newCoffee] $
                         testHerringboneSettings
                 Right asset <- findAsset hb' (lp "add.js")
                 assertFileContentsIs "changed" (assetFilePath asset)
