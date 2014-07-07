@@ -23,8 +23,8 @@ test-suite herringbone-tests
   hs-source-dirs:       test .
   ghc-options:          -Wall
   build-depends:        base >=4.5 && <5,
-                        wai  >= 2.0 && <3,
-                        wai-app-static,
+                        wai,
+                        herringbone-wai,
                         text,
                         bytestring,
                         containers,
@@ -63,10 +63,7 @@ library
                         Web.Herringbone.GetBuildMapping
                         Web.Herringbone.BuildAsset
                         Web.Herringbone.FindAsset
-                        Web.Herringbone.Adapter.Wai
   build-depends:        base >=4.5 && <5,
-                        wai  >= 2.0 && <3,
-                        wai-app-static,
                         text,
                         bytestring,
                         containers,

@@ -52,12 +52,9 @@ module Web.Herringbone (
     CompileError,
     PPReader(..),
     PPM,
-    -- * WAI
-    toApplication
 ) where
 
 import Web.Herringbone.Configuration
 import Web.Herringbone.Types
 import Web.Herringbone.FindAsset
 import Web.Herringbone.Precompile
-import Web.Herringbone.Adapter.Wai

@@ -18,8 +18,7 @@ import Filesystem.Path.CurrentOS (FilePath)
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
-import Web.Herringbone.FindAsset
-import Web.Herringbone.Types
+import Web.Herringbone
 
 class ToLazyByteString a where
     toLazyByteString :: a -> BL.ByteString
@@ -54,8 +53,9 @@ lookupFile hb pieces = do
                        (last pieces)
         return . LRFile $ file
 
+-- WaiAppStatic takes care of directory traversal attacks for us
 toLogicalPath :: Pieces -> LogicalPath
-toLogicalPath = LogicalPath . map fromPiece
+toLogicalPath = unsafeMakeLogicalPath . map fromPiece
 
 -- This is just given to wai-app-static which takes care of serving it.
 toFile :: FilePath -- ^ source path
