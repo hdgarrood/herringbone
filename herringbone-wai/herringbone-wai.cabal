@@ -1,7 +1,7 @@
 name:                herringbone-wai
-version:             0.0.1
--- synopsis:
--- description:
+version:             0.1.0
+synopsis:            Wai adapter for the Herringbone web asset preprocessor.
+description:         Wai adapter for the Herringbone web asset preprocessor.
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
