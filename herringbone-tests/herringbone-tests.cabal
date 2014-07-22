@@ -1,34 +1,24 @@
-name:                herringbone
-version:             0.1.0
-synopsis:            A library for compiling and serving static web assets.
-description:         A library for compiling and serving static web assets. For more information, please see <https://github.com/hdgarrood/herringbone>.
+name:                herringbone-tests
+version:             0.0.1
+-- synopsis:
+-- description:
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
 maintainer:          harry@garrood.me
+-- copyright:
 category:            Web
 build-type:          Simple
+-- extra-source-files:
 cabal-version:       >=1.10
-extra-source-files:
-    README.md
 
-source-repository head
-  type:     git
-  location: https://github.com/hdgarrood/herringbone
-
-library
+executable herringbone-tests
+  main-is:              Spec.hs
   ghc-options:          -Wall
-  exposed-modules:      Web.Herringbone,
-                        Web.Herringbone.Preprocessor.StdIO
-                        Web.Herringbone.Preprocessor.Sass
-                        Web.Herringbone.Preprocessor.CoffeeScript
-  other-modules:        Web.Herringbone.Types
-                        Web.Herringbone.Configuration
-                        Web.Herringbone.GetBuildMapping
-                        Web.Herringbone.BuildAsset
-                        Web.Herringbone.Precompile
-                        Web.Herringbone.FindAsset
   build-depends:        base >=4.5 && <5,
+                        wai,
+                        herringbone,
+                        herringbone-wai,
                         text,
                         bytestring,
                         containers,
@@ -43,6 +33,9 @@ library
                         http-types,
                         time,
                         old-locale,
+                        hspec >= 1.8,
+                        HUnit,
+                        warp,
                         file-embed,
                         template-haskell
   default-extensions:   OverloadedStrings,
