@@ -1,8 +1,8 @@
-module Web.Herringbone.FindAsset where
+module Web.Herringbone.Internal.FindAsset where
 
-import Web.Herringbone.GetBuildMapping
-import Web.Herringbone.BuildAsset
-import Web.Herringbone.Types
+import Web.Herringbone.Internal.GetBuildMapping
+import Web.Herringbone.Internal.BuildAsset
+import Web.Herringbone.Internal.Types
 
 findAsset :: Herringbone
           -> LogicalPath

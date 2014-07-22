@@ -1,4 +1,4 @@
-module Web.Herringbone.Types where
+module Web.Herringbone.Internal.Types where
 
 import Control.Monad.Reader
 import Control.Applicative

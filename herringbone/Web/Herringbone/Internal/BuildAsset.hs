@@ -1,6 +1,6 @@
 -- | This module contains functions to build assets (that is, run preprocessing
 -- if necessary, and copy to destination directory).
-module Web.Herringbone.BuildAsset where
+module Web.Herringbone.Internal.BuildAsset where
 
 import Control.Monad.Reader
 import Data.Maybe
@@ -10,7 +10,7 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
-import Web.Herringbone.Types
+import Web.Herringbone.Internal.Types
 
 -- | Build an asset based on a BuildSpec to produce a 'Asset'. This action
 -- checks whether the compilation is necessary based on the modified times of

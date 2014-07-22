@@ -22,12 +22,11 @@ library
                         Web.Herringbone.Preprocessor.StdIO
                         Web.Herringbone.Preprocessor.Sass
                         Web.Herringbone.Preprocessor.CoffeeScript
-  other-modules:        Web.Herringbone.Types
-                        Web.Herringbone.Configuration
-                        Web.Herringbone.GetBuildMapping
-                        Web.Herringbone.BuildAsset
-                        Web.Herringbone.Precompile
-                        Web.Herringbone.FindAsset
+                        Web.Herringbone.Internal.Types
+                        Web.Herringbone.Internal.Configuration
+                        Web.Herringbone.Internal.GetBuildMapping
+                        Web.Herringbone.Internal.BuildAsset
+                        Web.Herringbone.Internal.FindAsset
   build-depends:        base >=4.5 && <5,
                         text,
                         bytestring,
@@ -42,9 +41,7 @@ library
                         unix-compat,
                         http-types,
                         time,
-                        old-locale,
-                        file-embed,
-                        template-haskell
+                        old-locale
   default-extensions:   OverloadedStrings,
                         TypeSynonymInstances,
                         FlexibleInstances,

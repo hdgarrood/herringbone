@@ -1,10 +1,10 @@
-module Web.Herringbone.Configuration where
+module Web.Herringbone.Internal.Configuration where
 
 import Data.Time.Clock (getCurrentTime)
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 
-import Web.Herringbone.Types
+import Web.Herringbone.Internal.Types
 
 -- | For convenience.
 herringbone :: ConfigBuilder -> IO Herringbone

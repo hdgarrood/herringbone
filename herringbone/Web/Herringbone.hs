@@ -34,7 +34,7 @@ module Web.Herringbone (
     hbPPs,
     hbVerbose,
     HerringboneSettings(..),
-    module Web.Herringbone.Configuration,
+    module Web.Herringbone.Internal.Configuration,
     -- * Assets
     LogicalPath,
     makeLogicalPath,
@@ -43,8 +43,6 @@ module Web.Herringbone (
     toFilePath,
     Asset(..),
     findAsset,
-    precompile,
-    embedAssets,
     -- * Preprocessors
     PP(..),
     PPs,
@@ -54,7 +52,6 @@ module Web.Herringbone (
     PPM,
 ) where
 
-import Web.Herringbone.Configuration
-import Web.Herringbone.Types
-import Web.Herringbone.FindAsset
-import Web.Herringbone.Precompile
+import Web.Herringbone.Internal.Configuration
+import Web.Herringbone.Internal.Types
+import Web.Herringbone.Internal.FindAsset

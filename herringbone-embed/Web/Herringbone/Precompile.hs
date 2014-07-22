@@ -9,9 +9,9 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Data.Text as T
 import Control.Monad (forM, (>=>))
 
-import Web.Herringbone.GetBuildMapping
-import Web.Herringbone.FindAsset
-import Web.Herringbone.Types
+import Web.Herringbone
+import Web.Herringbone.Internal.GetBuildMapping (getBuildMapping)
+import Web.Herringbone.Internal.Types (BuildSpec(..), LogicalPath(..))
 
 -- | Precompiles all assets.
 precompile :: Herringbone -> IO [(LogicalPath, AssetError)]

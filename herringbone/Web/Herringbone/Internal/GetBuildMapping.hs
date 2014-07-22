@@ -18,7 +18,7 @@
 -- This architecture should ensure that the file mapping is identical in each
 -- mode.
 --
-module Web.Herringbone.GetBuildMapping where
+module Web.Herringbone.Internal.GetBuildMapping where
 
 import Control.Monad
 import Control.Applicative ((<$>))
@@ -29,7 +29,7 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
-import Web.Herringbone.Types
+import Web.Herringbone.Internal.Types
 
 getBuildMapping :: Herringbone -> IO BuildMapping
 getBuildMapping hb = do
