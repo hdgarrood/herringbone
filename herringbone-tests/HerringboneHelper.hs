@@ -29,8 +29,8 @@ unsafeFromEither x = error $ "unsafeFromEither: " ++ show x
 
 testHerringboneSettings :: HerringboneSettings
 testHerringboneSettings = makeSettings
-    ( setSourceDir  "test/resources/assets"
-    . setDestDir    "test/resources/compiled_assets"
+    ( setSourceDir  "resources/assets"
+    . setDestDir    "resources/compiled_assets"
     . setPreprocessors [ failingPP
                        , coffeeScript
                        , sass

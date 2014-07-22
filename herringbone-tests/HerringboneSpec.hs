@@ -7,6 +7,8 @@ import Test.Hspec
 import Test.HUnit hiding (path)
 
 import Web.Herringbone
+import Web.Herringbone.Precompile
+import Web.Herringbone.Internal.Utils
 import SpecHelper
 
 spec :: Spec

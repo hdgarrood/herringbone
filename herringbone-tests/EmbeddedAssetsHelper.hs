@@ -2,6 +2,7 @@
 module EmbeddedAssetsHelper where
 
 import Web.Herringbone
+import Web.Herringbone.Precompile
 import Data.ByteString (ByteString)
 import HerringboneHelper (testHB)
 

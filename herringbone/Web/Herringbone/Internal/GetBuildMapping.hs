@@ -22,7 +22,7 @@ module Web.Herringbone.Internal.GetBuildMapping where
 
 import Control.Monad
 import Control.Applicative ((<$>))
-import Data.Maybe (catMaybes, fromMaybe)
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Filesystem.Path.CurrentOS (FilePath, (</>))
 import qualified Filesystem.Path.CurrentOS as F
@@ -30,40 +30,13 @@ import qualified Filesystem as F
 import Prelude hiding (FilePath)
 
 import Web.Herringbone.Internal.Types
+import Web.Herringbone.Internal.Utils
 
 getBuildMapping :: Herringbone -> IO BuildMapping
 getBuildMapping hb = do
     files <- getFilesRecursiveRelative $ hbSourceDir hb
     return $ map (getBuildSpec hb) files
 
--- | Return the absolute paths of all files (excluding directories and other
--- things) below the given root.
-getFilesRecursive :: FilePath -> IO [FilePath]
-getFilesRecursive root = do
-    results         <- F.listDirectory root
-    (files, others) <- partitionM F.isFile results
-    (dirs, _)       <- partitionM F.isDirectory others
-    subfiles        <- mapM getFilesRecursive dirs
-    return $ files ++ concat subfiles
-
--- | Return the relative paths of all files (excluding directories and other
--- things) below the given root.
-getFilesRecursiveRelative :: FilePath -> IO [FilePath]
-getFilesRecursiveRelative root = do
-    root' <- F.canonicalizePath (root </> "") -- this is required, because. :/
-    files <- getFilesRecursive root'
-    let maybes = map (F.stripPrefix root') files
-    return $ catMaybes maybes
-
--- should this go in a utils module?
-partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
-partitionM f = foldM g ([], [])
-    where
-    g (as, bs) x = do
-        flag <- f x
-        return $ if flag
-            then (x : as, bs)
-            else (as, x : bs)
 
 -- | Given a FilePath of a source file, construct a BuildSpec for the file.
 getBuildSpec :: Herringbone -> FilePath -> BuildSpec

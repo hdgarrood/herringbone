@@ -19,6 +19,7 @@ executable herringbone-tests
                         wai,
                         herringbone,
                         herringbone-wai,
+                        herringbone-embed,
                         text,
                         bytestring,
                         containers,

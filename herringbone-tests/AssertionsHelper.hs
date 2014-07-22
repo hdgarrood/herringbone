@@ -22,7 +22,7 @@ testWithInputs groupName f =
         assignName n input   = ("input #" ++ show n, input)
 
 resultsDir :: FilePath
-resultsDir = "test/resources/results"
+resultsDir = "resources/results"
 
 testWithExpectedResult :: Text -> Assertion
 testWithExpectedResult logicalPathText = do
