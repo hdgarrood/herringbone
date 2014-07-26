@@ -1,0 +1,7 @@
+language: haskell
+ghc: 7.6
+install: /bin/true
+script:
+    - cabal sandbox init
+    - cabal install ./herringbone ./herringbone-wai ./herringbone-embed ./herringbone-tests
+    - cabal run herringbone-tests
