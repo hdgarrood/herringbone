@@ -8,4 +8,5 @@ script:
     - cabal install ./herringbone ./herringbone-wai ./herringbone-embed
     - cd herringbone-tests
     - cabal sandbox init --sandbox ../.cabal-sandbox
+    - cabal install --only-dependencies
     - cabal run herringbone-tests
