@@ -189,6 +189,9 @@ data Asset = Asset
     -- ^ Modification time of the asset's source file.
     }
 
+assetContent :: Asset -> IO B.ByteString
+assetContent = F.readFile . assetFilePath
+
 instance Show Asset where
     show (Asset size sourcePath filePath modifiedTime) =
         "Asset { " ++

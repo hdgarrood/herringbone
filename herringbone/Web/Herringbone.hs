@@ -42,6 +42,7 @@ module Web.Herringbone (
     fromLogicalPath,
     toFilePath,
     Asset(..),
+    assetContent,
     findAsset,
     precompile,
     -- * Preprocessors
