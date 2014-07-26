@@ -14,6 +14,8 @@ import qualified Fay
 import qualified Fay.Config as Fay
 import Web.Herringbone
 
+-- | Make a Fay preprocessor which will compile Fay files (which end \".hs\")
+-- to JavaScript (\".js\"), using the supplied 'Fay.Config'.
 makeFayPP :: Fay.Config -> PP
 makeFayPP config = PP
     { ppName     = "fay"
