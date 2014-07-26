@@ -2,6 +2,7 @@ module Web.Herringbone.Preprocessor.Fay (makeFayPP) where
 
 import Control.Monad.IO.Class
 import Control.Monad.Reader
+import Control.Applicative
 import Data.Char
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
@@ -10,29 +11,31 @@ import System.IO.Temp
 import System.FilePath
 import qualified Filesystem.Path.CurrentOS as F
 import qualified Fay
-import qualified Fay.Compiler.Config as Fay
+import qualified Fay.Config as Fay
 import Web.Herringbone
 
-makeFayPP :: Fay.CompileConfig -> PP
+makeFayPP :: Fay.Config -> PP
 makeFayPP config = PP
-    { ppExtension = "hs"
-    , ppAction    = compile config
+    { ppName     = "fay"
+    , ppConsumes = "hs"
+    , ppProduces = "js"
+    , ppAction   = compile config
     }
 
-compile :: Fay.CompileConfig
+compile :: Fay.Config
         -> ByteString
         -> PPM (Either CompileError ByteString)
 compile config _ = do
         pps <- asks ppReaderPPs
-        if ppExtension (head pps) /= "hs"
+        if ppName (head pps) /= "fay"
             then return $ Left
                 "Fay must appear first in the preprocessor chain"
             else compileUnsafe config
 
-compileUnsafe :: Fay.CompileConfig -> PPM (Either CompileError ByteString)
+compileUnsafe :: Fay.Config -> PPM (Either CompileError ByteString)
 compileUnsafe config' = do
-    sourceDirs <- fmap (map es . hbSourceDirs) $ asks ppReaderHb
-    let config = Fay.addConfigDirectoryIncludePaths sourceDirs config'
+    sourceDir <- (es . hbSourceDir) <$> asks ppReaderHb
+    let config = Fay.addConfigDirectoryIncludePaths [sourceDir] config'
     sourcePath <- fmap es $ asks ppReaderSourcePath
 
     liftIO $ do
@@ -41,7 +44,7 @@ compileUnsafe config' = do
         putStrLn $ "sourcePath: " ++ show sourcePath
     result <- liftIO $ Fay.compileFile config sourcePath
     either (return . Left . toBS . wrapWithPre . Fay.showCompileError)
-           (return . Right . toBS . fst)
+           (return . Right . toBS)
            result
     where
         es = F.encodeString
