@@ -119,10 +119,10 @@ myPP = PP { ppName = "my preprocessor"
     insertAt2 _ []     = error "oops"
 ```
 
-The Monad that `ppAction` runs in, `PPM`, is an instance of `MonadIO`, allowing
-you to perform arbitrary `IO` actions using `liftIO`. It is also an instance of
-`MonadReader PPReader`, where `PPReader` is a data type containing information
-about the asset.
+Herringbone defines a data type for preprocessor actions: `PPM`. It has
+typeclass instances to allow you to perform arbitrary `IO` actions, and also to
+obtain information about the asset and the `Herringbone` that is being used to
+compile it.
 
 Using an adapter together with preprocessors is best suited to development,
 where after writing a file in your text editor, you simply refresh the page to
