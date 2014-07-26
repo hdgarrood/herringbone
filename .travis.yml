@@ -6,4 +6,5 @@ install:
 script:
     - cabal sandbox init
     - cabal install ./herringbone ./herringbone-wai ./herringbone-embed ./herringbone-tests
-    - cabal run herringbone-tests
+    - cd herringbone-tests
+    - cabal run
