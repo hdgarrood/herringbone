@@ -2,7 +2,8 @@ module Web.Herringbone.Adapter.Wai (toApplication) where
 
 import Control.Monad
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy as BL hiding (pack)
+import qualified Data.ByteString.Lazy.Char8 as BL
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.Lazy as T
 import Data.Time
@@ -79,7 +80,7 @@ assetCompileError err =
 
 ambiguousSources :: [FilePath] -> File
 ambiguousSources sources =
-    let toLazyBS = BL.fromStrict . T.encodeUtf8 . F.encode
+    let toLazyBS = BL.pack . F.encodeString
         htmlListItem item = "<li>" <> toLazyBS item <> "</li>"
         htmlList items = BL.concat (map htmlListItem items)
         body = "<h1>Ambiguous asset source</h1>" <>
