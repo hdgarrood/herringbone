@@ -22,6 +22,7 @@ source directory to search for assets in, the destination directory to place
 compiled assets into.
 
 ```haskell
+{-# LANGUAGE OverloadedStrings #-}
 import Web.Herringbone
 
 hb' = IO Herringbone
@@ -88,10 +89,45 @@ Now suppose you've created `javascript/main.coffee` and `css/styles.sass`; you
 will be able access compiled versions of these via the logical paths
 `javascript/main.js` and `css/styles.css`.
 
+You can create your own preprocessors; for example, here is one that puts the
+date on the second line of a HTML5 Application Cache manifest:
+
+```haskell
+{-# LANGUAGE OverloadedStrings #-}
+import Data.Time
+import Data.Monoid
+import qualified Data.ByteString.Char8 as B
+import Control.Monad.IO.Class
+import System.Locale
+import Web.Herringbone
+
+myPP :: PP
+myPP = PP { ppName = "my preprocessor"
+          , ppConsumes = ".manifestWithDate"
+          , ppProduces = ".manifest"
+          , ppAction = insertDate
+          }
+    where
+    insertDate string = do
+        datetime <- liftIO getCurrentTime
+        let commentLine = "# " <> showTime datetime
+        let result = B.unlines . insertAt2 commentLine . B.lines $ string
+        return . Right $ result
+    showTime = B.pack . formatTime defaultTimeLocale
+                            (dateTimeFmt defaultTimeLocale)
+    insertAt2 y (x:xs) = x : y : xs
+    insertAt2 _ []     = error "oops"
+```
+
+The Monad that `ppAction` runs in, `PPM`, is an instance of `MonadIO`, allowing
+you to perform arbitrary `IO` actions using `liftIO`. It is also an instance of
+`MonadReader PPReader`, where `PPReader` is a data type containing information
+about the asset.
+
 Using an adapter together with preprocessors is best suited to development,
 where after writing a file in your text editor, you simply refresh the page to
 get the updated version. In production, you will probably want to do all the
-compilation beforehand. Herringbone allows for that too:
+compilation beforehand. Herringbone allows for that too, with `precompile`:
 
 ```haskell
 main :: IO ()

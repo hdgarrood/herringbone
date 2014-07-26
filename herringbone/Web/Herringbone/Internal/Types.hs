@@ -13,6 +13,7 @@ import System.Locale
 import System.IO hiding (FilePath)
 import qualified Data.ByteString as B
 import qualified Filesystem.Path.CurrentOS as F
+import qualified Filesystem as F
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 
@@ -31,7 +32,9 @@ data PPReader = PPReader
     , ppReaderSourcePath  :: FilePath
     -- ^ The file path to the source file
     , ppReaderPPs         :: [PP]
-    -- ^ Preprocessors being invoked.
+    -- ^ Preprocessors being invoked. Currently this will only ever have zero
+    -- or one elements; in the future, Herringbone may be able to run multiple
+    -- preprocessors on a single file.
     }
 
 -- | A monad in which preprocessor actions happen.
