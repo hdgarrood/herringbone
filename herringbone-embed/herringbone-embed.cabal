@@ -11,7 +11,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Web.Herringbone.Precompile
+  exposed-modules:     Web.Herringbone.Embed
   build-depends:       base >=4.6 && <5,
                        herringbone,
                        system-filepath,

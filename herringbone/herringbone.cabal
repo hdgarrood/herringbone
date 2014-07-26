@@ -22,6 +22,7 @@ library
                         Web.Herringbone.Preprocessor.StdIO
                         Web.Herringbone.Preprocessor.Sass
                         Web.Herringbone.Preprocessor.CoffeeScript
+                        Web.Herringbone.Internal.Precompile
                         Web.Herringbone.Internal.Types
                         Web.Herringbone.Internal.Configuration
                         Web.Herringbone.Internal.GetBuildMapping
