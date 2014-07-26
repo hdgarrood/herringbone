@@ -49,7 +49,7 @@ example1 = do
 
 You can now access assets using `findAsset`:
 
-```
+```haskell
     asset <- findAsset hb path
     print . assetSize $ asset         # file size, in bytes
     print . assetSourcePath $ asset   # full source path on disk
@@ -61,7 +61,7 @@ You can now access assets using `findAsset`:
 But you probably want to use an adapter, like the one for Wai, so that you can
 access assets over HTTP:
 
-```
+```haskell
 serveAssets :: IO ()
 serveAssets = do
     hb <- hb'
@@ -72,7 +72,7 @@ Herringbone's real utility comes when you want to preprocess files before
 serving them. Suppose you are fed up with JavaScript and CSS, and you want to
 use CoffeeScript and Sass instead. Add the preprocessors to your `Herringbone`: 
 
-```
+```haskell
 import Web.Herringbone.Preprocessor.CoffeeScript (coffeeScript)
 import Web.Herringbone.Preprocessor.Sass (sass)
 
@@ -93,7 +93,7 @@ where after writing a file in your text editor, you simply refresh the page to
 get the updated version. In production, you will probably want to do all the
 compilation beforehand. Herringbone allows for that too:
 
-```
+```haskell
 main :: IO ()
 main = do
     hb <- hb'
@@ -108,7 +108,7 @@ main = do
 Alternatively you can use the `herringbone-embed` package to embed all of your
 assets into your executable with Template Haskell:
 
-```
+```haskell
 import Web.Herringbone.Embed
 
 assets :: [(LogicalPath, ByteString)]
