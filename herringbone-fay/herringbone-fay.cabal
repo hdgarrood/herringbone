@@ -1,15 +1,14 @@
 name:                herringbone-fay
-version:             0.0.1
--- synopsis:
--- description:
+version:             0.1.0
+synopsis:            Fay preprocessor for herringbone.
+description:         A Fay preprocessor for the herringbone web asset pipeline.  Compile and serve Fay files from any Haskell web application.
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
 maintainer:          harry@garrood.me
--- copyright:
+copyright:           MIT
 category:            Web
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
 
 library
