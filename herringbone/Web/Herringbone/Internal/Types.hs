@@ -64,9 +64,9 @@ instance Show PP where
 
 -- | A function which performs the compilation.
 type PPAction =
-    B.ByteString ->
+    B.ByteString
     -- ^ Input file contents
-    PPM (Either CompileError B.ByteString)
+    -> PPM (Either CompileError B.ByteString)
     -- ^ Output file contents, or a compile error.
 
 -- | A string which should contain information about why an asset failed to
@@ -97,9 +97,10 @@ fromList = foldr insertPP emptyPPs
 
 -- | A BuildSpec specifies how an asset should be built.
 data BuildSpec = BuildSpec
-    FilePath    -- ^ Source path (relative)
-    FilePath    -- ^ Destination path (again, relative)
-    (Maybe PP)  -- ^ Preprocessor to run (if any)
+    { bsSourcePath :: FilePath  -- ^ Source path (relative)
+    , bsDestPath   :: FilePath  -- ^ Destination path (again, relative)
+    , bsPP         :: (Maybe PP)  -- ^ Preprocessor to run (if any)
+    }
     deriving (Show)
 
 -- | A BuildMapping contains the information to build all of the assets

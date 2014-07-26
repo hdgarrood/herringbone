@@ -26,7 +26,9 @@ getFilesRecursiveRelative root = do
     let maybes = map (F.stripPrefix root') files
     return $ catMaybes maybes
 
--- should this go in a utils module?
+-- | Partition a list of values based on a monadic predicate, with the list of
+-- values satisfying the predicate as the first element of the result pair, and
+-- the list of values not satisfying the predicate as the second.
 partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
 partitionM f = foldM g ([], [])
     where
