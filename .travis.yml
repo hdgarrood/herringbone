@@ -7,5 +7,5 @@ script:
     - cabal sandbox init
     - cabal install ./herringbone ./herringbone-wai ./herringbone-embed ./herringbone-tests
     - cd herringbone-tests
-    - cabal install --only-dependencies
-    - cabal run
+    - cabal sandbox init --sandbox ../.cabal-sandbox
+    - herringbone-tests
