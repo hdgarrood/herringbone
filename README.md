@@ -52,11 +52,11 @@ You can now access assets using `findAsset`:
 
 ```haskell
     asset <- findAsset hb path
-    print . assetSize $ asset         # file size, in bytes
-    print . assetSourcePath $ asset   # full source path on disk
-    print . assetFilePath $ asset     # full destination path on disk
-    print . assetModifiedTime $ asset # modification time
-    print =<< assetContent asset      # the contents of the file
+    print . assetSize $ asset           -- file size, in bytes
+    print . assetSourcePath $ asset     -- full source path on disk
+    print . assetFilePath $ asset       -- full destination path on disk
+    print . assetModifiedTime $ asset   -- modification time
+    print =<< assetContent asset        -- the contents of the file
 ```
 
 But you probably want to use an adapter, like the one for Wai, so that you can
