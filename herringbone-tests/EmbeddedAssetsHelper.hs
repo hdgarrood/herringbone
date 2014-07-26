@@ -2,10 +2,9 @@
 module EmbeddedAssetsHelper where
 
 import Web.Herringbone
-import Web.Herringbone.Precompile
+import Web.Herringbone.Embed
 import Data.ByteString (ByteString)
 import HerringboneHelper (testHB)
 
-embeddedAssets :: ([(LogicalPath, AssetError)],
-                   [(LogicalPath, ByteString)])
+embeddedAssets :: [(LogicalPath, ByteString)]
 embeddedAssets = $(embedAssets testHB)

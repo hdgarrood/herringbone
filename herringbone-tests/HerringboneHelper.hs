@@ -31,6 +31,17 @@ testHerringboneSettings :: HerringboneSettings
 testHerringboneSettings = makeSettings
     ( setSourceDir  "resources/assets"
     . setDestDir    "resources/compiled_assets"
+    . setPreprocessors [ coffeeScript
+                       , sass
+                       , scss
+                       , sed
+                       ]
+    )
+
+testHerringboneSettingsWithFailures :: HerringboneSettings
+testHerringboneSettingsWithFailures = makeSettings
+    ( setSourceDir "resources/failing_assets"
+    . setDestDir "resources/compiled_failing_assets"
     . setPreprocessors [ failingPP
                        , coffeeScript
                        , sass
@@ -44,6 +55,9 @@ testHB = initHerringbone testHerringboneSettings
 
 testHBVerbose :: IO Herringbone
 testHBVerbose = initHerringbone $ setVerbose testHerringboneSettings
+
+testHBFailing :: IO Herringbone
+testHBFailing = initHerringbone testHerringboneSettingsWithFailures
 
 testServerPort :: Int
 testServerPort = 3002

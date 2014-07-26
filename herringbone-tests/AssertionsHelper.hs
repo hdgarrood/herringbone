@@ -69,10 +69,9 @@ assertIsRight (Left x)  = assertFailure $
                             "Expected a Right value; got: Left " ++ show x
 
 
-assertGotAllAssets :: [a] -> [b] -> [c] -> Assertion
-assertGotAllAssets errs sources dests =
-    assertEqual' (countSources - countErrs) countDests
+assertGotAllAssets :: [a] -> [b] -> Assertion
+assertGotAllAssets sources dests =
+    assertEqual' countSources countDests
     where
-    countErrs    = length errs
     countSources = length sources
     countDests   = length dests
