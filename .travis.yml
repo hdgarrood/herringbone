@@ -2,7 +2,7 @@ language: haskell
 ghc: 7.6
 install:
     - gem install sass
-    - npm install coffee-script
+    - npm install -g coffee-script
 script:
     - cabal sandbox init
     - cabal install ./herringbone ./herringbone-wai ./herringbone-embed ./herringbone-tests
