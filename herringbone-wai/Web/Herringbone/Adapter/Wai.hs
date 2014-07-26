@@ -1,8 +1,10 @@
-module Web.Herringbone.Adapter.Wai where
+module Web.Herringbone.Adapter.Wai (toApplication) where
 
 import Control.Monad
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.Text.Encoding as T
+import qualified Data.Text.Lazy as T
 import Data.Time
 import Data.Time.Clock.POSIX
 import System.Posix.Types (EpochTime)
@@ -19,15 +21,6 @@ import qualified Filesystem.Path.CurrentOS as F
 import qualified Filesystem as F
 
 import Web.Herringbone
-
-class ToLazyByteString a where
-    toLazyByteString :: a -> BL.ByteString
-
-instance ToLazyByteString FilePath where
-    toLazyByteString = toLazyByteString . F.encode
-
-instance ToLazyByteString B.ByteString where
-    toLazyByteString = BL.fromChunks . (: [])
 
 
 -- | Convert a 'Herringbone' to a WAI 'Application'.
@@ -82,14 +75,17 @@ toEpochTime = fromIntegral . toSecs
 
 assetCompileError :: CompileError -> File
 assetCompileError err =
-    fileError (toLazyByteString err) (unsafeToPiece "compile-error.html")
+    fileError (BL.fromStrict err) (unsafeToPiece "compile-error.html")
 
 ambiguousSources :: [FilePath] -> File
 ambiguousSources sources =
-    let body = "<h1>Ambiguous asset source</h1>" <>
+    let toLazyBS = BL.fromStrict . T.encodeUtf8 . F.encode
+        htmlListItem item = "<li>" <> toLazyBS item <> "</li>"
+        htmlList items = BL.concat (map htmlListItem items)
+        body = "<h1>Ambiguous asset source</h1>" <>
                 "<p>List of possible asset sources:</p>" <>
                 "<ul>" <>
-                BL.concat (map (\s -> "<li>" <> toLazyByteString s <> "</li>") sources) <>
+                htmlList sources <>
                 "</ul>"
     in fileError body (unsafeToPiece "error-ambiguous-source.html")
 

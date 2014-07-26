@@ -6,10 +6,8 @@ license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
 maintainer:          harry@garrood.me
--- copyright:
 category:            Web
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
 
 library
@@ -22,6 +20,7 @@ library
                        system-filepath,
                        system-fileio,
                        bytestring,
+                       text,
                        http-types
   default-extensions:  OverloadedStrings,
                        ViewPatterns
