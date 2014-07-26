@@ -16,6 +16,8 @@ import qualified Filesystem.Path.CurrentOS as F
 import Filesystem.Path.CurrentOS (FilePath)
 import Prelude hiding (FilePath)
 
+-- | A value describing an error that occurred while trying to produce an
+-- 'Asset'.
 data AssetError = AssetNotFound
                 | AssetCompileError CompileError
                 | AmbiguousSources [FilePath]
@@ -129,15 +131,20 @@ data HerringboneSettings = HerringboneSettings
 
 type ConfigBuilder = HerringboneSettings -> HerringboneSettings
 
+-- | The directory where Herringbone will look when searching for assets.
 hbSourceDir :: Herringbone -> FilePath
 hbSourceDir = settingsSourceDir . herringboneSettings
 
+-- | The directory to place assets in after compilation.
 hbDestDir :: Herringbone -> FilePath
 hbDestDir = settingsDestDir . herringboneSettings
 
+-- | The collection of preprocessors that will be used when preprocessing
+-- assets.
 hbPPs :: Herringbone -> PPs
 hbPPs = settingsPPs . herringboneSettings
 
+-- | True iff the 'Herringbone' has the verbose setting enabled.
 hbVerbose :: Herringbone -> Bool
 hbVerbose = settingsVerbose . herringboneSettings
 
@@ -148,13 +155,14 @@ verbosePut hb msg = when (hbVerbose hb) $ do
     hFlush stdout
 
 -- | All assets in Herringbone are referenced by their logical path. This is
--- the path to an asset, relative to any of the source directories.
+-- the path to an asset, relative to the source directory.
 newtype LogicalPath = LogicalPath { fromLogicalPath :: [Text] }
     deriving (Show, Eq)
 
--- | Create a LogicalPath from a list of Text values. This returns Nothing if
--- the path would be unsafe (that is, if it contains \"..\"), to prevent
--- directory traversal attacks.
+-- | Create a LogicalPath from a list of path segments. For example,
+-- @[\"data\", \"dogs.txt\"]@ would map to data/dogs.txt (relative to the
+-- source directory).  This returns Nothing if the path would be unsafe (that
+-- is, if it contains \"..\"), to prevent directory traversal attacks.
 makeLogicalPath :: [Text] -> Maybe LogicalPath
 makeLogicalPath xs = if safe xs then Just $ LogicalPath xs else Nothing
     where

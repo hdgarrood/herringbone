@@ -4,6 +4,10 @@ import Web.Herringbone.Internal.GetBuildMapping
 import Web.Herringbone.Internal.BuildAsset
 import Web.Herringbone.Internal.Types
 
+-- | The most important function in this library. Attempts to find the asset
+-- referenced by the given 'LogicalPath', compiles it if necessary (based on
+-- file modification time), and returns it to you as an 'Asset' (or an
+-- 'AssetError', if something went wrong).
 findAsset :: Herringbone
           -> LogicalPath
           -> IO (Either AssetError Asset)
