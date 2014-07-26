@@ -5,7 +5,7 @@ install:
     - npm install -g coffee-script
 script:
     - cabal sandbox init
-    - cabal install ./herringbone ./herringbone-wai ./herringbone-embed ./herringbone-tests
+    - cabal install ./herringbone ./herringbone-wai ./herringbone-embed
     - cd herringbone-tests
     - cabal sandbox init --sandbox ../.cabal-sandbox
-    - herringbone-tests
+    - cabal run herringbone-tests
