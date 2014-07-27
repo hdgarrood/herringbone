@@ -1,5 +1,5 @@
 name:                herringbone-embed
-version:             0.1.0
+version:             0.1.1
 synopsis:            Embed preprocessed web assets in your executable with Template Haskell.
 description:         Embed preprocessed web assets in your executable with Template Haskell.
 license:             MIT

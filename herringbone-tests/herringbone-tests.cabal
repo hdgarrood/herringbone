@@ -1,15 +1,11 @@
 name:                herringbone-tests
 version:             0.0.1
--- synopsis:
--- description:
 license:             MIT
 license-file:        LICENSE
 author:              Harry Garrood
 maintainer:          harry@garrood.me
--- copyright:
 category:            Web
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
 
 executable herringbone-tests
