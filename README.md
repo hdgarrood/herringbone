@@ -17,6 +17,27 @@ Alpha.
 How to use it
 -------------
 
+Suppose you're building a web application, and you have an `assets` directory,
+like this:
+
+```
+css/
+    normalize.css
+    main.sass
+js/
+    jquery.js
+    Main.hs
+img/
+    kitten.jpg
+```
+
+You want CSS, JavaScript, and jpg files to be served as-is, but you want to
+compile Sass into CSS, and Haskell into JavaScript (let's say via Fay) before
+serving it. Additionally you want to be able to edit any of these files, hit
+refresh in your browser, and immediately get the new version. Finally, when
+it's time to deploy your application, you want to compile all the assets before
+you start servicing requests. Herringbone can handle all of this for you.
+
 Start by creating a `Herringbone`, which holds configuration data, such as the
 source directory to search for assets in, the destination directory to place
 compiled assets into.
@@ -24,29 +45,33 @@ compiled assets into.
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
 import Web.Herringbone
+import Web.Herringbone.Preprocessor.Sass (sass)
+import Web.Herringbone.Preprocessor.Fay (fay)
 
 hb' = IO Herringbone
 hb' = herringbone
     ( setSourceDir "assets"
     . setDestDir   "compiled_assets"
+    . setPreprocessors [fay, sass]
     )
 ```
 
 All assets in Herringbone are referenced by their logical path, which is a
-relative path to the asset from the source directory. Herringbone uses a type
-synonym `LogicalPath = [Text]`, where each element in the list represents a
-path segment. So, for example, if you wanted to get
-`javascript/application.js`, you could do:
+relative path to the asset from the source directory. Logical paths are
+represented as `[Text]`, where each element in the list represents a path
+segment. So, for example, if you wanted to get `js/jquery.js`, you
+could do:
 
 ```haskell
 example1 :: IO ()
 example1 = do
     hb <- hb'
-    let path' = makeLogicalPath ["javascript", "application.js"]
-    path = case path' of
-        Just p -> p
-        Nothing -> fail "invalid path"
+    let path = unsafeMakeLogicalPath ["js", "jquery.js"]
 ```
+
+(Using `unsafeMakeLogicalPath` is ok in this context; the safe version is only
+there to make sure there are no `..` in the path, to prevent people requesting
+`../../../../etc/passwd`, for example.)
 
 You can now access assets using `findAsset`:
 
@@ -69,25 +94,10 @@ serveAssets = do
     Network.Wai.Handler.Warp.run 3000 (toApplication hb)
 ```
 
-Herringbone's real utility comes when you want to preprocess files before
-serving them. Suppose you are fed up with JavaScript and CSS, and you want to
-use CoffeeScript and Sass instead. Add the preprocessors to your `Herringbone`: 
-
-```haskell
-import Web.Herringbone.Preprocessor.CoffeeScript (coffeeScript)
-import Web.Herringbone.Preprocessor.Sass (sass)
-
-hb2' :: IO Herringbone
-hb2' = herringbone
-    ( setSourceDir "assets"
-    . setDestDir   "compiled_assets"
-    . setPreprocessors [coffeeScript, sass]
-    )
-```
-
-Now suppose you've created `javascript/main.coffee` and `css/styles.sass`; you
-will be able access compiled versions of these via the logical paths
-`javascript/main.js` and `css/styles.css`.
+Preprocessors work on files based on their filenames. Each preprocessor
+contains information about the kinds of files it consumes and produces. When a
+request comes in for `js/Main.js`, Herringbone will match up the Fay
+preprocessor with `js/Main.hs` to serve the correct file.
 
 You can create your own preprocessors; for example, here is one that puts the
 date on the second line of a HTML5 Application Cache manifest:
@@ -124,10 +134,8 @@ typeclass instances to allow you to perform arbitrary `IO` actions, and also to
 obtain information about the asset and the `Herringbone` that is being used to
 compile it.
 
-Using an adapter together with preprocessors is best suited to development,
-where after writing a file in your text editor, you simply refresh the page to
-get the updated version. In production, you will probably want to do all the
-compilation beforehand. Herringbone allows for that too, with `precompile`:
+Once you're ready to deploy your app, use `precompile` to compile all of your
+assets in one go:
 
 ```haskell
 main :: IO ()
@@ -138,7 +146,7 @@ main = do
         putStrLn "warning: compilation errors:"
         mapM_ (print . show) errors
 
-    serveYourApp
+    runYourApp
 ```
 
 Alternatively you can use the `herringbone-embed` package to embed all of your
